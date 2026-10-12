@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title id="pg-title">Arjun &amp; Kajal — Wedding Invitation</title>
+<link rel="icon" href="./favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Italiana&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cinzel:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#fdf5ec">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#fdf5ec"/>
+    <rect x="60" y="60" width="1080" height="680" fill="none" stroke="#9a7b3a" stroke-width="2"/>
+    <text x="600" y="360" text-anchor="middle" font-family="Georgia,serif" font-size="150" fill="#8F3914">G &amp; B</text>
+    <text x="600" y="470" text-anchor="middle" font-family="Georgia,serif" font-size="26" fill="rgba(143,57,20,.8)" letter-spacing="6">WEDDING INVITATION</text>
+    <text x="600" y="540" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="22" fill="#9a7b3a">Save the Date</text>
+  </svg>
+</template>
+<style>
+:root{--maroon:#8F3914;--maroon2:#A8451A;--maroon-pale:#fdf2f0;--gold:#9a7b3a;--gold2:#c9a96e;--gold-pale:#fdf8ee;--bg:#fef9f5;--bg2:#f8f1ea;--bg3:#f2e8df;--cream:#1a0f0a;--cream2:#2d160c;--muted:#7a6558;--rule:rgba(154,123,58,.13);--card:#fff;--cb:rgba(154,123,58,.15);--ss:0 2px 12px rgba(139,26,26,.06);--sm:0 6px 28px rgba(139,26,26,.08);--rs:10px;--rm:18px;--rl:26px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;overflow-x:hidden}
+body{background:#fdf5ec;font-family:'Cormorant Garamond',serif;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}a{text-decoration:none;color:inherit}
+
+/* ── OPENING SCREEN ── */
+#opening{position:fixed;inset:0;z-index:1000;overflow:hidden;background:#fdf5ec;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .9s ease,visibility .9s ease}
+@media(min-width:768px){#opening{max-width:640px;left:0;right:0;margin:0 auto;border-left:1px solid rgba(154,123,58,.12);border-right:1px solid rgba(154,123,58,.12);box-shadow:0 0 100px rgba(0,0,0,.6)}}
+#opening.away{opacity:0;visibility:hidden;pointer-events:none}
+#prv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s}
+@media(min-width:768px){#prv{object-fit:contain;background:#0a0604}}
+#prv.rdy{opacity:1}
+/* hold the tap prompt until the video has a first frame */
+#opening #stt0{opacity:1;cursor:pointer}
+#vid-loader{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:7;display:none;flex-direction:column;align-items:center;gap:14px;pointer-events:none}
+#vid-loader.show{display:flex}
+#vid-loader .ring{width:34px;height:34px;border-radius:50%;border:2px solid rgba(178,66,17,.18);border-top-color:#B24211;animation:vlspin .8s linear infinite}
+#vid-loader .vl-txt{font-family:'Cinzel',serif;letter-spacing:.34em;font-size:8px;color:rgba(178,66,17,.7)}
+@keyframes vlspin{to{transform:rotate(360deg)}}
+body.preview-mode #vid-loader{display:none!important}
+
+
+/* state 0: tap to open — 20% below vertical center, bounce */
+#stt0{position:absolute;left:50%;top:70%;z-index:5;text-align:center;transition:opacity .8s ease;animation:tbounce 1.8s ease-in-out infinite}
+#stt0.gone{opacity:0;pointer-events:none}
+@keyframes tbounce{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-14px)}}
+.tlbl{font-family:'Cinzel',serif;letter-spacing:.42em;font-size:15px;color:#B24211;white-space:nowrap;display:block;text-shadow:0 1px 6px rgba(178,66,17,.25)}
+
+/* paper content — appears during video */
+#pcnt{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px 52px;clip-path:inset(50% 0 50% 0)}
+#pcnt.vis{clip-path:inset(0% 0 0% 0)} /* fallback for ended state */
+.pe{font-family:'Cinzel',serif;letter-spacing:.55em;font-size:7px;color:#B24211;margin-top:24px;margin-bottom:8px}
+.pn{font-family:'Italiana',serif;font-size:clamp(20px,6vw,30px);line-height:.95;color:#B24211;margin-bottom:8px}
+.pa{font-family:'Playfair Display',serif;font-style:italic;color:#B24211;display:block;font-size:.44em;margin:8px 0}
+.pd{font-family:'Cinzel',serif;letter-spacing:.42em;font-size:clamp(8px,2.2vw,11px);color:#B24211;margin-bottom:10px}
+.pv{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:11px;color:#B24211;opacity:.8}
+.pdiv{display:flex;align-items:center;gap:12px;justify-content:center;margin:18px 0}
+#pc-div1{margin-top:6px;margin-bottom:12px}#pc-div2{margin-top:4px;margin-bottom:4px}
+.pdiv span{width:42px;height:1px;background:linear-gradient(90deg,transparent,rgba(178,66,17,.4),transparent)}
+.pdiv i{width:4px;height:4px;border-radius:50%;background:#B24211;opacity:.6;font-style:normal}
+
+/* state 2: tap again */
+#stt2{position:absolute;bottom:48px;left:50%;transform:translateX(-50%);z-index:6;font-family:'Cinzel',serif;letter-spacing:.42em;font-size:9px;color:rgba(178,66,17,.92);opacity:0;transition:opacity .8s;white-space:nowrap;text-align:center;animation:glo 2s ease-in-out infinite}
+#stt2.vis{opacity:1}
+@keyframes glo{0%,100%{text-shadow:none}50%{text-shadow:0 0 14px rgba(201,169,110,.35)}}
+#vpb{position:absolute;bottom:0;left:0;height:2px;width:0%;background:linear-gradient(90deg,var(--maroon),var(--gold2));z-index:8;transition:width .12s linear}
+
+/* ── OWNER BUTTONS ── */
+#own{position:fixed;top:14px;right:46px;z-index:9990;display:flex;gap:4px;align-items:center}
+#own.show{display:flex}
+.ob{width:auto;height:auto;padding:8px;border-radius:0;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:transparent;transition:opacity .25s;box-shadow:none}
+.ob.edit{background:transparent;color:var(--maroon)}.ob.share{background:transparent;color:var(--gold)}
+.ob:hover{opacity:.6}.ob svg{width:18px;height:18px;pointer-events:none}
+
+/* ── MAIN INVITATION ── */
+#main-inv{display:none;background:var(--bg);color:var(--cream);opacity:0;transform:translateY(22px);transition:opacity .85s ease,transform .85s ease;max-width:540px;margin:0 auto}#main-inv.show{display:block}#main-inv.show-in{opacity:1;transform:translateY(0)}
+body.io{background:var(--bg);overflow:auto}
+#sticky-initials{position:fixed;top:0;left:0;right:0;z-index:9985;text-align:center;padding:14px 0 10px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:.44em;color:var(--gold);background:linear-gradient(to bottom,var(--bg) 60%,transparent);opacity:0;transform:translateY(-10px);transition:opacity .4s ease,transform .4s ease;pointer-events:none}
+#sticky-initials.vis{opacity:1;transform:translateY(0)}
+#today-date{position:fixed;top:18px;left:18px;z-index:9988;font-family:'Cinzel',serif;font-size:8px;letter-spacing:.2em;color:var(--gold);opacity:.6;display:none}
+body.io #today-date{display:block}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease}
+.reveal.on{opacity:1;transform:none}
+.ey{font-family:'Cinzel',serif;letter-spacing:.44em;font-size:9px;color:var(--gold);margin-bottom:14px;display:inline-flex;align-items:center;gap:8px}
+.ey::before,.ey::after{content:"";display:inline-block;width:20px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+.ey::after{background:linear-gradient(90deg,var(--gold),transparent)}
+.st{font-family:'Italiana',serif;font-size:clamp(32px,9vw,50px);color:var(--cream2);margin-bottom:36px;line-height:1.06}
+.dv{display:flex;align-items:center;justify-content:center;gap:16px;margin:44px 0 12px}
+.dv span{flex:1;height:1px;max-width:72px;background:linear-gradient(90deg,transparent,var(--rule),transparent)}
+.dv .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px var(--gold-pale)}
+
+/* HERO */
+.hs{min-height:100svh;position:relative;display:flex;align-items:flex-start;justify-content:center;text-align:center;padding:120px 28px 40px;overflow:hidden}
+@media(min-width:768px){.hs{width:100vw;max-width:100vw;margin-left:calc(-50vw + 50%);position:relative;min-height:100vh;padding:140px 48px 80px}}
+.hbg{position:absolute;inset:0;background:url('./video/hero-background.png') center top/cover no-repeat;z-index:0}
+@media(min-width:768px){.hbg{background-size:auto 100%;background-position:center center;background-repeat:no-repeat}}
+.hov{display:none}
+.hc{position:relative;z-index:2;color:#8F3914}
+.ht{font-family:'Cinzel',serif;letter-spacing:.52em;font-size:9px;color:rgba(143,57,20,.85);margin-bottom:22px}
+.hn{font-family:'Italiana',serif;font-size:clamp(52px,15vw,90px);line-height:.9;margin-bottom:16px}
+@keyframes shimmer{0%{background-position:-300% center}100%{background-position:300% center}}#h-bride,#h-groom{background:linear-gradient(90deg,#8F3914 15%,#A84D22 28%,#C4713E 38%,#E8A870 47%,#F5C8A0 50%,#E8A870 53%,#C4713E 62%,#A84D22 72%,#8F3914 85%);background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline-block;}#h-bride{animation:shimmer 7s ease-in-out infinite;}#h-groom{animation:shimmer 7s ease-in-out infinite;animation-delay:-3.5s;}
+.ha{font-family:'Playfair Display',serif;font-style:italic;color:#8F3914;display:block;font-size:.44em;margin:10px 0}
+.hln{display:flex;align-items:center;gap:14px;justify-content:center;margin:20px 0}
+.hln span{width:52px;height:1px;background:linear-gradient(90deg,transparent,rgba(143,57,20,.45),transparent)}
+.hln i{width:5px;height:5px;border-radius:50%;background:#8F3914;font-style:normal}
+.hd{font-family:'Cinzel',serif;letter-spacing:.42em;font-size:clamp(12px,3.5vw,16px);color:#8F3914;margin-bottom:8px}
+.hvu{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:#8F3914;margin-top:10px;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;gap:5px}.hvu::before{content:'\2605';font-size:8px;opacity:.7;font-style:normal}#scroll-hint{position:absolute;bottom:28px;right:24px;z-index:3;display:flex;flex-direction:column;align-items:center;gap:5px;opacity:1;transition:opacity .6s ease;pointer-events:none}#scroll-hint.hide{opacity:0}#scroll-hint .sh-txt{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:8px;color:#8F3914;writing-mode:vertical-rl;text-orientation:mixed}#scroll-hint .sh-arr{display:flex;flex-direction:column;align-items:center;gap:2px;animation:arr-bounce 1.6s ease-in-out infinite}#scroll-hint .sh-arr span{display:block;width:10px;height:10px;border-right:1.5px solid #8F3914;border-bottom:1.5px solid #8F3914;transform:rotate(45deg);opacity:1}#scroll-hint .sh-arr span:nth-child(2){opacity:.55;margin-top:-6px}#scroll-hint .sh-arr span:nth-child(3){opacity:.25;margin-top:-6px}@keyframes arr-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+
+/* QR SHARE CARD */
+#qr-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+#qr-ov.open{display:flex}
+#qr-wrap{max-width:340px;width:88%;animation:qrIn .35s ease}
+@keyframes qrIn{from{opacity:0;transform:scale(.92) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+#qr-card{background:linear-gradient(170deg,#fef9f5 0%,#f8f1ea 50%,#f2e8df 100%);border:2px solid rgba(154,123,58,.22);border-radius:14px;padding:32px 24px 24px;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+#qr-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.qc-ey{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.5em;color:rgba(154,123,58,.55);margin-bottom:14px}
+.qc-nm{font-family:'Italiana',serif;font-size:clamp(30px,9vw,38px);line-height:1;color:var(--maroon)}
+.qc-amp{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--maroon);display:block;margin:5px 0}
+.qc-ln{display:flex;align-items:center;gap:10px;justify-content:center;margin:12px 0}
+.qc-ln span{width:36px;height:1px;background:linear-gradient(90deg,transparent,rgba(154,123,58,.35),transparent)}
+.qc-ln i{width:4px;height:4px;border-radius:50%;background:var(--gold);font-style:normal}
+.qc-dt{font-family:'Cinzel',serif;letter-spacing:.32em;font-size:10px;color:var(--maroon);margin-bottom:5px}
+.qc-vn{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:rgba(143,57,20,.55);margin-bottom:16px}
+#qr-cv-wrap{display:inline-block;padding:8px;background:#fff;border-radius:6px;border:1px solid rgba(154,123,58,.12);margin-bottom:5px}
+.qc-sc{font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.4em;color:rgba(154,123,58,.45);margin-bottom:16px}
+.qc-acts{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+.qc-b{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.16em;padding:9px 16px;border:1px solid rgba(154,123,58,.25);border-radius:5px;background:transparent;color:var(--gold);cursor:pointer;transition:all .25s}
+.qc-b:hover{background:rgba(154,123,58,.07);border-color:var(--gold)}
+.qc-b.p{background:var(--maroon);color:#fef9f5;border-color:var(--maroon)}
+.qc-b.p:hover{background:var(--maroon2)}
+.qc-x{position:absolute;top:10px;right:12px;background:none;border:none;font-size:18px;color:rgba(154,123,58,.35);cursor:pointer;padding:4px;line-height:1}
+.qc-x:hover{color:var(--maroon)}
+
+
+/* COUNTDOWN */
+.cds{background:var(--bg2);padding:60px 24px;text-align:center;border-bottom:1px solid var(--rule)}
+.cdl{font-family:'Cinzel',serif;letter-spacing:.38em;font-size:8.5px;color:var(--gold);margin-bottom:26px}
+.cdg{display:flex;justify-content:center;gap:0;max-width:420px;margin:0 auto}
+.cdu{flex:1;text-align:center;padding:22px 8px;background:var(--card);border:1px solid var(--cb)}
+.cdu:first-child{border-radius:var(--rl) 0 0 var(--rl)}.cdu:last-child{border-radius:0 var(--rl) var(--rl) 0}.cdu+.cdu{border-left:none}
+.cdn{font-family:'Italiana',serif;font-size:clamp(38px,10vw,56px);color:var(--maroon);line-height:1;display:block}
+.cdt{font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:.28em;color:var(--muted);margin-top:8px;display:block;opacity:.75}
+.cdd{display:inline-block}
+@keyframes cdup{0%{transform:translateY(60%);opacity:0}100%{transform:translateY(0);opacity:1}}.cdd.cda{animation:cdup .6s ease-out}
+
+/* EVENTS */
+.evs{background:var(--bg);padding:76px 24px 64px;border-bottom:1px solid var(--rule)}
+.evc{background:var(--card);border:1px solid var(--cb);border-radius:var(--rm);box-shadow:var(--sm);padding:22px 20px;margin-bottom:16px;position:relative;overflow:hidden;transition:transform .3s,box-shadow .3s;text-align:left}
+.evc::before{content:"";position:absolute;top:0;left:0;bottom:0;width:3px;background:linear-gradient(to bottom,var(--maroon),var(--gold2));border-radius:4px 0 0 4px}
+.evc:hover{transform:translateY(-3px);box-shadow:0 14px 44px rgba(139,26,26,.1)}
+.evh{display:flex;align-items:center;gap:14px;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--rule)}
+.evn{width:32px;height:32px;border-radius:50%;background:linear-gradient(160deg,#A04520 0%,#8F3914 100%);color:#fdf6ee;display:flex;align-items:center;justify-content:center;font-family:'Italiana',serif;font-size:18px;flex-shrink:0;box-shadow:0 4px 14px rgba(92,32,8,.3)}
+.evt{font-family:'Cinzel',serif;letter-spacing:.24em;font-size:10px;color:var(--cream2)}
+.evr{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(154,123,58,.07)}
+.evr:last-child{border-bottom:none}
+.evi{width:34px;height:34px;border-radius:50%;background:var(--gold-pale);border:1px solid rgba(154,123,58,.15);display:flex;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0}
+.evi svg{width:14px;height:14px}
+.evb{flex:1}.evl{font-family:'Cinzel',serif;letter-spacing:.22em;font-size:7.5px;color:var(--muted);opacity:.75;margin-bottom:3px}
+.evv{font-family:'Italiana',serif;font-size:17.5px;color:var(--cream2);line-height:1.3}
+.evs2{font-size:15px;color:var(--muted);font-style:italic;margin-top:1px}
+.eva{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+.eb{flex:1;min-width:110px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 14px;border-radius:var(--rs);border:none;cursor:pointer;font-family:'Cinzel',serif;letter-spacing:.18em;font-size:8.5px;transition:all .25s;text-decoration:none}
+.ebp{background:linear-gradient(160deg,#A04520 0%,#8F3914 100%);color:#fdf6ee;box-shadow:0 4px 14px rgba(92,32,8,.3)}
+.ebp:hover{box-shadow:0 8px 24px rgba(139,26,26,.32);transform:translateY(-1px)}
+.ebg{background:transparent;color:var(--cream);border:1px solid rgba(154,123,58,.22)}
+.ebg:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-pale)}
+.eb svg{width:11px;height:11px}
+
+/* STORY */
+.sts{background:var(--bg2);padding:76px 24px 64px;text-align:center;border-bottom:1px solid var(--rule)}
+.stl{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17.5px;color:var(--muted);max-width:38ch;margin:0 auto 42px;line-height:1.8}
+.stln{max-width:440px;margin:0 auto;position:relative;padding-top:10px}
+.stln::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--rule) 10%,var(--rule) 90%,transparent);transform:translateX(-50%)}
+.si{display:grid;grid-template-columns:1fr 28px 1fr;align-items:start;margin-bottom:46px}
+.sl{padding-right:18px;text-align:right}.sr{padding-left:18px;text-align:left}.se{min-height:1px}.simg{margin-top:12px;border-radius:8px;width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px dashed rgba(154,123,58,.3);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px}.simg svg{width:26px;height:26px;stroke:var(--muted);opacity:.45}.simg-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.2em;color:var(--muted);opacity:.5}.fms{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);padding:64px 24px;text-align:center}.fmg{display:flex;flex-direction:column;align-items:center;max-width:380px;margin:28px auto 0;width:100%}.fmb{width:100%;border:1px solid rgba(154,123,58,.3);border-radius:var(--rm);background:linear-gradient(160deg,#fff 0%,var(--gold-pale) 100%);padding:28px 22px;margin-bottom:0;position:relative;box-shadow:0 6px 28px rgba(154,123,58,.12),inset 0 1px 0 rgba(255,255,255,.8)}.fmb::before{content:'';position:absolute;inset:5px;border:1px solid rgba(154,123,58,.15);border-radius:calc(var(--rm) - 5px);pointer-events:none}.fmh{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:7.5px;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px;justify-content:center}.fmh::before,.fmh::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(154,123,58,.35));max-width:30px}.fmn{font-family:'Italiana',serif;font-size:clamp(22px,6vw,28px);color:var(--cream2);margin-bottom:6px}.fmp{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--muted);margin-bottom:8px}.fmd{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--cream2);line-height:1.6;margin-bottom:4px}.fmd2{font-family:'Cinzel',serif;letter-spacing:.15em;font-size:8px;color:var(--gold);opacity:.85;margin-top:8px;display:flex;align-items:center;gap:6px;justify-content:center}.fmd2::before,.fmd2::after{content:'\2605';font-size:6px;opacity:.6}.fmc{font-family:'Italiana',serif;font-size:24px;color:var(--gold2);display:flex;align-items:center;justify-content:center;padding:14px 0;width:100%;gap:10px}.fmc::before,.fmc::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(154,123,58,.3),transparent)}.fmdiv{border-top:1px solid var(--rule);max-width:180px;margin:24px auto 0}
+.sdc{display:flex;flex-direction:column;align-items:center;padding-top:4px}
+.sdot{width:13px;height:13px;border-radius:50%;background:var(--maroon);border:3px solid var(--bg2);box-shadow:0 0 0 2px rgba(154,123,58,.3),0 2px 8px rgba(139,26,26,.18)}
+.syr{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.3em;color:var(--gold);margin-bottom:0;padding-bottom:10px;border-bottom:1px solid rgba(154,123,58,.22);display:block}
+.sloc{font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:.18em;color:var(--maroon);opacity:.75;margin-top:10px;margin-bottom:10px}
+.stxt{font-size:15px;color:var(--muted);font-style:italic;line-height:1.7;margin-top:8px}
+
+/* RSVP */
+.rs{background:var(--bg);padding:76px 24px 64px;text-align:center;border-bottom:1px solid var(--rule)}
+.rcopy{color:var(--muted);font-size:18px;font-style:italic;max-width:36ch;margin:0 auto 14px;line-height:1.8}
+.rform{background:var(--card);border:1px solid var(--cb);border-radius:var(--rl);box-shadow:var(--sm);padding:30px 22px;max-width:480px;margin:0 auto;text-align:left}
+.rform h3{font-family:'Italiana',serif;font-size:26px;color:var(--cream2);margin-bottom:5px;text-align:center}
+.rform .note{text-align:center;font-size:15.5px;color:var(--muted);margin-bottom:22px;font-style:italic}
+.rf{margin-bottom:18px}
+.rl{font-family:'Cinzel',serif;letter-spacing:.18em;font-size:8.5px;color:var(--cream2);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.rl .n{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--maroon),var(--maroon2));color:#fdf6ee;font-size:9px;font-family:'Italiana',serif;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.ri{width:100%;padding:11px 13px;border:1px solid var(--cb);border-radius:var(--rs);background:rgba(253,248,238,.4);font-family:inherit;font-size:17px;color:var(--cream);outline:none;transition:border-color .2s,box-shadow .2s}
+.ri:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(154,123,58,.08);background:var(--card)}
+.ri::placeholder{color:var(--muted);opacity:.6}
+textarea.ri{resize:vertical;min-height:88px}
+.att{display:flex;gap:8px;margin-bottom:5px}.cnt-ctrl{display:flex;align-items:center;border:1px solid var(--cb);border-radius:var(--rs);width:100%;max-width:200px}.cnt-btn{width:48px;min-width:48px;height:48px;background:var(--bg2);border:none;cursor:pointer;font-size:22px;font-weight:300;color:var(--cream2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .2s}.cnt-btn:first-child{border-radius:var(--rs) 0 0 var(--rs)}.cnt-btn:last-child{border-radius:0 var(--rs) var(--rs) 0}.cnt-btn:active{background:var(--bg3)}.cnt-val{flex:1;text-align:center;font-family:'Italiana',serif;font-size:22px;color:var(--cream2);background:transparent;border:none;outline:none;pointer-events:none;padding:0}
+.ab{flex:1;padding:13px;border:1px solid rgba(154,123,58,.2);background:rgba(253,248,238,.4);border-radius:var(--rs);cursor:pointer;font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.18em;color:var(--muted);transition:all .25s}
+.ab.on{background:linear-gradient(160deg,#A04520 0%,#8F3914 100%);color:#f5ede0;border-color:#2a1510;box-shadow:0 4px 14px rgba(26,15,10,.22)}
+.rsub{width:100%;padding:15px;background:linear-gradient(160deg,#A04520 0%,#8F3914 100%);color:#fdf6ee;border:none;border-radius:var(--rs);cursor:pointer;font-family:'Cinzel',serif;letter-spacing:.25em;font-size:9.5px;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 4px 14px rgba(92,32,8,.3);transition:all .3s;margin-top:6px}
+.rsub:hover{box-shadow:0 10px 28px rgba(139,26,26,.32);transform:translateY(-1px)}
+.rsub:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.rsub svg{width:13px;height:13px}
+.rok{display:none;text-align:center;padding:32px 22px;background:var(--card);border-radius:var(--rl);border:1px solid var(--cb);box-shadow:var(--sm);max-width:480px;margin:0 auto}
+.rok.show{display:block}
+.rok .ck{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--maroon),var(--maroon2));color:#fdf6ee;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px;box-shadow:0 8px 22px rgba(139,26,26,.22)}
+.rok h3{font-family:'Italiana',serif;font-size:27px;color:var(--cream2);margin-bottom:7px}
+.rok p{color:var(--muted);font-size:15px;font-style:italic}
+
+/* WISHES */
+.ws{background:var(--bg2);padding:76px 24px 64px;text-align:center;border-bottom:1px solid var(--rule)}
+.wf{background:var(--card);border:1px solid var(--cb);border-radius:var(--rm);box-shadow:var(--sm);padding:16px 16px 14px;max-width:480px;margin:0 auto 20px}
+.wi{width:100%;padding:8px 11px;border:1px solid var(--cb);border-radius:var(--rs);background:rgba(253,248,238,.4);font-family:inherit;font-size:15px;color:var(--cream);outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:7px;display:block}
+.wi:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(154,123,58,.08);background:var(--card)}
+.wi::placeholder{color:var(--muted);opacity:.6}
+textarea.wi{min-height:64px;resize:none}
+.wsb{width:100%;padding:10px;background:linear-gradient(135deg,var(--maroon),var(--maroon2));color:#fdf6ee;border:none;border-radius:var(--rs);cursor:pointer;font-family:'Cinzel',serif;letter-spacing:.22em;font-size:8.5px;box-shadow:0 4px 16px rgba(139,26,26,.22);transition:all .25s;margin-top:2px}
+.wsb:hover{box-shadow:0 8px 24px rgba(139,26,26,.32);transform:translateY(-1px)}
+.wsb:disabled{opacity:.5;cursor:not-allowed;transform:none}
+#wwrap{max-width:480px;margin:0 auto;max-height:calc(5 * 72px);overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none}
+#wwrap::-webkit-scrollbar{display:none}
+#wgrid{display:grid;gap:6px}
+.wc{background:var(--card);border:1px solid var(--cb);border-radius:var(--rs);box-shadow:var(--ss);padding:10px 12px 8px;position:relative;overflow:hidden;text-align:left}
+.wc::before{content:"";position:absolute;top:0;left:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--maroon-pale),var(--gold-pale),var(--maroon-pale))}
+.wcm{font-family:'Italiana',serif;font-size:16px;color:var(--cream2);line-height:1.3;margin-bottom:4px;padding-left:10px}
+.wc-meta{display:flex;align-items:center;justify-content:space-between;padding-left:10px}
+.wcn{font-family:'Cormorant Garamond',serif;font-size:11px;color:var(--muted);letter-spacing:.03em;opacity:.65}
+.wlb{display:inline-flex;align-items:center;gap:3px;background:transparent;border:1px solid rgba(154,123,58,.18);border-radius:30px;padding:2px 8px;cursor:pointer;font-family:'Cinzel',serif;font-size:7px;letter-spacing:.08em;color:var(--muted);transition:all .22s;flex-shrink:0}
+.wlb:hover:not(:disabled){border-color:var(--maroon);color:var(--maroon)}
+.wlb.liked{border-color:var(--maroon);color:var(--maroon);background:var(--maroon-pale)}
+.wlhrt{font-size:9px;line-height:1}
+.wlcnt{min-width:10px;text-align:center}
+
+/* FOOTER */
+.ft{background:linear-gradient(160deg,#1a0f0a 0%,#2a1510 100%);padding:44px 24px 32px;text-align:center;color:#f5ede0}
+.fti{font-family:'Cinzel',serif;letter-spacing:.55em;font-size:11px;color:var(--gold2);margin-bottom:10px}
+.ftn{font-family:'Italiana',serif;font-size:26px;color:#f5ede0;margin-bottom:6px}
+.ftd{font-family:'Cinzel',serif;letter-spacing:.3em;font-size:9px;color:rgba(201,169,110,.65);margin-bottom:4px}
+.ftv{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:rgba(245,237,224,.5);margin-bottom:22px}
+.ftb{font-family:'Cinzel',serif;letter-spacing:.32em;font-size:8px;color:rgba(201,169,110,.4)}
+.ftb span{color:rgba(201,169,110,.65)}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(90px);background:linear-gradient(135deg,var(--maroon),var(--maroon2));color:#fdf6ee;padding:11px 24px;border-radius:50px;font-family:'Cinzel',serif;letter-spacing:.18em;font-size:8.5px;box-shadow:0 8px 26px rgba(139,26,26,.32);opacity:0;transition:all .35s cubic-bezier(.4,0,.2,1);z-index:9999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* EDIT SIDEBAR */
+#eov{position:fixed;inset:0;z-index:9998;background:rgba(26,15,10,.5);backdrop-filter:blur(4px);display:none}
+#esb{position:fixed;top:0;right:-380px;width:360px;max-width:100vw;height:100vh;height:100dvh;z-index:9999;background:#fff;box-shadow:-6px 0 40px rgba(0,0,0,.25);overflow-y:auto;transition:right .35s cubic-bezier(.4,0,.2,1);overscroll-behavior:contain;font-family:'Cormorant Garamond',serif}
+#esb.open{right:0}
+.esh{position:sticky;top:0;z-index:2;background:var(--maroon);color:#f5ede0;padding:15px 18px;display:flex;align-items:center;justify-content:space-between}
+.esht{font-family:'Cinzel',serif;letter-spacing:.22em;font-size:9.5px}
+.escl{background:none;border:none;color:#f5ede0;cursor:pointer;font-size:22px;line-height:1;opacity:.75;padding:0}
+.escl:hover{opacity:1}
+.ess{border-bottom:1px solid rgba(154,123,58,.16)}
+.essh{padding:12px 18px 8px;font-family:'Cinzel',serif;letter-spacing:.24em;font-size:8.5px;color:var(--gold);background:rgba(245,240,232,.9);cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none}
+.esca{font-size:9px}
+.esbd{padding:12px 16px 16px;display:none}
+.esbd.op{display:block}
+.esrw{margin-bottom:12px}.esrw:last-child{margin-bottom:0}
+.eslb{font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:.2em;color:var(--muted);margin-bottom:5px}
+.esfi{display:flex;gap:6px;align-items:stretch}
+.esin{flex:1;padding:8px 10px;border:1px solid rgba(154,123,58,.25);border-radius:8px;font-size:13px;font-family:'Cormorant Garamond',serif;color:var(--cream);background:#faf8f4;outline:none;transition:border-color .2s;min-width:0}
+.esin:focus{border-color:var(--gold);background:#fff}
+.esdl{background:none;border:1px solid rgba(139,26,26,.2);border-radius:8px;width:32px;flex-shrink:0;cursor:pointer;font-size:12px;color:var(--maroon);display:flex;align-items:center;justify-content:center;transition:all .18s}
+.esdl:hover{background:var(--maroon);color:#fff;border-color:var(--maroon)}
+.esft{padding:16px 18px;text-align:center;border-top:1px solid rgba(154,123,58,.12)}
+.esfn{font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:.16em;color:rgba(154,123,58,.5)}
+@media(max-width:380px){#esb{width:100vw}}
+@media(min-width:640px){.evs,.rs,.ws,.sts{padding-left:44px;padding-right:44px}}
+@media(min-width:768px){
+  body{background:#fdf5ec;display:flex;flex-direction:column;align-items:center}
+  #main-inv{border-left:1px solid rgba(154,123,58,.18);border-right:1px solid rgba(154,123,58,.18);box-shadow:0 4px 32px rgba(143,57,20,.1),0 0 0 1px rgba(154,123,58,.12)}
+  .hs{max-width:100%}
+  .hero-bg-img,.hero-ov{border-radius:0}
+}
+@keyframes omfloat{0%  {opacity:0;transform:translate(-50%,-50%)}6%  {opacity:var(--oop,1);transform:translate(calc(-50% + var(--odx,0px)*0.06),calc(-50% - 10px))}100%{opacity:0;transform:translate(calc(-50% + var(--odx,0px)),calc(-50% - 160px))}}.omp{position:fixed;pointer-events:none;z-index:9999;animation:omfloat var(--odur,4s) ease-out var(--odel,0s) both;filter:invert(27%) sepia(50%) saturate(750%) hue-rotate(344deg) brightness(95%);user-select:none;display:block}
+/* Preview mode (iframe) */
+body.preview-mode #opening{position:relative;min-height:100vh;background:#fdf5ec}
+body.preview-mode #prv{display:none}
+body.preview-mode #stt0{display:none}
+body.preview-mode #stt2{display:none}
+body.preview-mode #vpb{display:none}
+body.preview-mode #pcnt{clip-path:inset(0% 0 0% 0)!important;position:relative}
+body.preview-mode #main-inv{display:none!important}
+body.preview-mode #own{display:none!important}
+
+/* ══════════════════════════════════════════════════════════
+   DESKTOP & BIG SCREEN — 1024px / 1440px / 1920px
+   Transforms the mobile card into an immersive luxury desktop experience:
+   wider container · 2-col events grid · side-by-side family · bigger type
+══════════════════════════════════════════════════════════ */
+
+/* ── 1024px: STANDARD DESKTOP ── */
+@media(min-width:1024px){
+  body,body.io{background:#fdf5ec}
+  #opening{max-width:630px;box-shadow:0 4px 32px rgba(143,57,20,.1),0 0 0 1px rgba(154,123,58,.14)}
+  #main-inv{max-width:775px;border-left:1px solid rgba(154,123,58,.2);border-right:1px solid rgba(154,123,58,.2);box-shadow:0 4px 40px rgba(143,57,20,.1),0 0 0 1px rgba(154,123,58,.15)}
+  #sticky-initials{background:linear-gradient(to bottom,rgba(253,245,236,.96) 60%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .hs{width:100%;max-width:100%;margin-left:0;height:100svh;padding:140px 28px 32px}
+  .hbg{background-color:#fdf5ec;background-size:contain;background-position:top center;background-repeat:no-repeat}
+  .hn{font-size:clamp(42px,7vw,80px)}
+  .ht{font-size:11px;letter-spacing:.56em;margin-bottom:28px}
+  .hd{font-size:clamp(13px,1.6vw,18px);letter-spacing:.44em}
+  .hvu{font-size:16px}
+  #scroll-hint{bottom:40px;right:48px}
+  .cds{padding:88px 28px}
+  .cdg{max-width:660px}
+  .cdn{font-size:clamp(50px,6.5vw,80px)}
+  .cdt{font-size:9px;letter-spacing:.34em}
+  .evs{padding:100px 28px 88px}
+  #evsc{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:32px}
+  .evc{width:100%;max-width:580px}
+  .sts{padding:100px 28px 88px}
+  .stln{max-width:100%}
+  .stl{max-width:52ch;font-size:19px;line-height:1.9}
+  .fms{padding:88px 28px}
+  .fmg{flex-direction:row;max-width:100%;align-items:stretch}
+  .fmb{flex:1}
+  .fmc{flex-direction:column;padding:0 20px;width:auto;min-width:52px}
+  .fmc::before,.fmc::after{width:1px;height:auto;background:linear-gradient(to bottom,transparent,rgba(154,123,58,.35),transparent)}
+  .rs{padding:100px 28px 88px}
+  .rform{max-width:100%;padding:36px 32px}
+  .rcopy{font-size:20px;max-width:44ch}
+  .ws{padding:100px 28px 88px}
+  .wf{max-width:100%}
+  #wgrid{max-width:480px}
+  .st{font-size:clamp(42px,5vw,64px);margin-bottom:44px}
+  .ey{font-size:10px;letter-spacing:.48em}
+  #esb{width:440px;right:-440px}
+  #esb.open{right:0}
+  .ft{padding:56px 64px 44px}
+  .ftn{font-size:30px}
+}
+
+/* ── 1440px: BIG SCREEN ── */
+@media(min-width:1440px){
+  #main-inv{max-width:650px}
+  #opening{max-width:560px}
+  .hs{height:100svh;padding:150px 28px 32px}
+  .hn{font-size:clamp(46px,7vw,86px)}
+  .hd{font-size:clamp(14px,1.6vw,19px)}
+  .hvu{font-size:17px}
+  .cds{padding:100px 28px}
+  .cdg{max-width:780px}
+  .cdn{font-size:clamp(62px,6vw,96px)}
+  .evs{padding:120px 28px 100px}
+  #evsc{gap:16px}
+  .sts{padding:120px 28px 100px}
+  .stln{max-width:100%}
+  .stl{font-size:21px;max-width:56ch}
+  .fms{padding:100px 28px}
+  .fmg{max-width:100%}
+  .rs{padding:120px 28px 100px}
+  .rform{max-width:100%;padding:42px 38px}
+  .rcopy{font-size:21px;max-width:46ch}
+  .ws{padding:120px 28px 100px}
+  .wf{max-width:100%}
+  #wgrid{max-width:480px}
+  .st{font-size:clamp(50px,4.5vw,74px)}
+  .ft{padding:68px 80px 54px}
+}
+
+/* ── 1920px: ULTRA-WIDE ── */
+@media(min-width:1920px){
+  #main-inv{max-width:685px}
+  #opening{max-width:595px}
+  .hs{height:100svh;padding:160px 28px 32px}
+  .hn{font-size:clamp(50px,6.5vw,90px)}
+  .cdg{max-width:900px}
+  .cdn{font-size:clamp(72px,5.5vw,110px)}
+  .evs{padding:140px 28px 120px}
+  #evsc{gap:16px}
+  .sts{padding:140px 28px 120px}
+  .stln{max-width:100%}
+  .fmg{max-width:100%}
+  .rs{padding:140px 28px 120px}
+  .rform{max-width:100%}
+  .ws{padding:140px 28px 120px}
+  #wgrid{max-width:480px}
+  .ft{padding:80px 100px 64px}
+}
+
+
+
+/* ── MUTE/UNMUTE BUTTON ── */
+#mute-btn{
+  position:fixed;bottom:24px;right:18px;z-index:9987;
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(253,248,238,.92);
+  border:1px solid rgba(154,123,58,.2);
+  display:none;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.12);
+  transition:all .25s;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+}
+#mute-btn.vis{display:flex}
+#mute-btn:hover{background:var(--gold-pale);border-color:var(--gold)}
+#mute-btn svg{width:17px;height:17px;stroke:var(--gold);fill:none;stroke-width:2;pointer-events:none}
+</style>
+</head>
+<body>
+
+<!-- ══ PAPER ROLL OPENING ══ -->
+<div id="opening" onclick="tap()">
+  <video id="prv" playsinline preload="auto" muted>
+    <source src="./video/paper-roll.mp4" type="video/mp4">
+  </video>
+
+  <!-- State 0: Tap to Open -->
+  <div id="stt0"><p class="tlbl">TAP TO OPEN</p></div>
+
+  <!-- Loading indicator (shown while the paper-roll video buffers) -->
+  <div id="vid-loader" class="show"><div class="ring"></div><div class="vl-txt">LOADING</div></div>
+
+  <!-- Paper content (written inside the roll — reveals mid-video) -->
+  <div id="pcnt">
+    <div class="pe" id="pc-eyebrow">WEDDING<br>INVITATION</div>
+    <div class="pdiv" id="pc-div1"><span></span><i></i><span></span></div>
+    <div class="pn" id="pc-bride-groom" style="display:flex;flex-direction:column;align-items:center;margin-bottom:14px;padding:4px 0 4px;"><span id="pc-groom" style="display:block;">Arjun</span><span class="pa" id="pc-and">&amp;</span><span id="pc-bride" style="display:block;">Kajal</span></div>
+    <div class="pdiv" id="pc-div2"><span></span><i></i><span></span></div>
+    <div class="pd" id="pc-date" style="margin-top:8px;">12 &nbsp;&#183;&nbsp; 12 &nbsp;&#183;&nbsp; 2026</div>
+    <div class="pv" id="pc-venue">The Grand Palace, New Delhi</div>
+  </div>
+
+  <!-- State 2: Tap Again to Open -->
+  <div id="stt2">&#8593; &nbsp; TAP AGAIN TO OPEN YOUR INVITATION &nbsp; &#8593;</div>
+  <div id="vpb"></div>
+</div>
+
+<!-- ══ OWNER: EDIT + SHARE ══ -->
+<div id="own">
+  <button class="ob edit" onclick="openES()" title="Edit Invitation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+  </button>
+  <a class="ob" href="https://app.syncandstyle.com" title="Dashboard" style="color:var(--maroon)">
+    <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5V6a.5.5 0 0 1-1 0V4.5A.5.5 0 0 1 8 4zM3.732 5.732a.5.5 0 0 1 .707 0l.915.914a.5.5 0 1 1-.708.708l-.914-.915a.5.5 0 0 1 0-.707zM2 10a.5.5 0 0 1 .5-.5h1.586a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 10zm9.5 0a.5.5 0 0 1 .5-.5h1.5a.5.5 0 0 1 0 1H12a.5.5 0 0 1-.5-.5zm.754-4.246a.389.389 0 0 0-.527-.02L7.547 9.31a.91.91 0 1 0 1.302 1.258l3.434-4.297a.389.389 0 0 0-.029-.518z"/><path fill-rule="evenodd" d="M0 10a8 8 0 1 1 15.547 2.661c-.442 1.253-1.845 1.602-2.932 1.25C11.309 13.488 9.475 13 8 13c-1.474 0-3.31.488-4.615.911-1.087.352-2.49.003-2.932-1.25A7.988 7.988 0 0 1 0 10zm8-7a7 7 0 0 0-6.603 9.329c.203.575.923.876 1.68.63C4.397 12.533 6.358 12 8 12s3.604.532 4.923.96c.757.245 1.477-.056 1.68-.631A7 7 0 0 0 8 3z"/></svg>
+  </a>
+</div>
+<div id="share-always" style="position:fixed;top:14px;right:14px;z-index:9989;display:flex">
+  <button class="ob share" onclick="shareInv()" title="Share Invitation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51L8.59 10.49"/></svg>
+  </button>
+</div>
+
+<!-- ══ MAIN INVITATION ══ -->
+<div id="sticky-initials"></div>
+<div id="today-date"></div>
+<div id="main-inv">
+
+  <!-- HERO -->
+  <section class="hs">
+    <div class="hbg"></div>
+    <div class="hov"></div>
+    <div class="hc">
+      <div class="ht">&#9670; WEDDING INVITATION &#9670;</div>
+      <h1 class="hn"><span id="h-groom">Arjun</span><span class="ha">&amp;</span><span id="h-bride">Kajal</span></h1>
+      <div class="hln"><span></span><i></i><span></span></div>
+      <div class="hd" id="h-date">12 &nbsp;&#183;&nbsp; 12 &nbsp;&#183;&nbsp; 2026</div>
+      <div class="hvu" id="h-venue">The Grand Palace, New Delhi</div>
+    </div>
+    <div id="scroll-hint"><span class="sh-txt">SCROLL</span><div class="sh-arr"><span></span><span></span><span></span></div></div>
+</section>
+
+  <!-- COUNTDOWN -->
+  <section class="cds">
+    <div class="reveal">
+      <div class="cdl">— COUNTING DOWN TO THE BIG DAY —</div>
+      <div class="cdg">
+        <div class="cdu"><span class="cdn" id="cd-d">--</span><span class="cdt">DAYS</span></div>
+        <div class="cdu"><span class="cdn" id="cd-h">--</span><span class="cdt">HOURS</span></div>
+        <div class="cdu"><span class="cdn" id="cd-m">--</span><span class="cdt">MINUTES</span></div>
+        <div class="cdu"><span class="cdn" id="cd-s">--</span><span class="cdt">SECONDS</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <section class="evs">
+    <div class="reveal" style="text-align:center">
+      <div class="ey">— THE OCCASIONS —</div>
+      <h2 class="st">Join Us</h2>
+      <div id="evsc"></div>
+    </div>
+    <div class="dv"><span></span><div class="dot"></div><span></span></div>
+  </section>
+
+  <!-- OUR STORY -->
+  <section class="sts">
+    <div class="reveal" style="text-align:center">
+      <div class="ey">— OUR JOURNEY —</div>
+      <h2 class="st">A Journey of Love</h2>
+      <p class="stl" id="stled">A beautiful love story written by God.</p>
+      <div class="stln" id="stln"></div>
+      <div class="dv"><span></span><div class="dot"></div><span></span></div>
+    </div>
+  </section>
+
+  <!-- FAMILY -->
+  <section class="fms reveal">
+    <div class="ey">— WITH THE BLESSINGS OF OUR FAMILIES —</div>
+    <div class="st" style="margin-bottom:8px">Together We Celebrate</div>
+    <div class="fmg">
+      <div class="fmb">
+        <div class="fmh">GROOM'S FAMILY</div>
+        <div class="fmn" id="fm-groom">Groom Name</div>
+        <div class="fmp">Son of</div>
+        <div class="fmd" id="fm-gparents">Father &amp; Mother</div>
+        <div class="fmd2" id="fm-gplace">Village / City</div>
+      </div>
+      <div class="fmc">&#10022;</div>
+      <div class="fmb">
+        <div class="fmh">BRIDE'S FAMILY</div>
+        <div class="fmn" id="fm-bride2">Bride Name</div>
+        <div class="fmp">Daughter of</div>
+        <div class="fmd" id="fm-bparents">Father &amp; Mother</div>
+        <div class="fmd2" id="fm-bplace">Village / City</div>
+      </div>
+    </div>
+    <div class="fmdiv"></div>
+  </section>
+
+  <!-- RSVP -->
+  <section class="rs">
+    <div class="reveal" style="text-align:center">
+      <div class="ey">— YOUR PRESENCE —</div>
+      <h2 class="st">Will You Join Us?</h2>
+      <p class="rcopy">Kindly confirm by <strong style="color:var(--gold2)" id="rdl">the deadline</strong>.</p>
+      <div class="rform" id="rform">
+        <h3>RSVP</h3>
+        <div class="note">A few quick details &#127800;</div>
+        <div class="rf"><div class="rl"><span class="n">1</span>YOUR NAME</div><input type="text" class="ri" id="rn" placeholder="Your full name"></div>
+        <div class="rf"><div class="rl"><span class="n">2</span>WILL YOU ATTEND?</div><div class="att"><button type="button" class="ab" id="ayes" onclick="setA(true)">YES, I'LL JOIN</button><button type="button" class="ab" id="ano" onclick="setA(false)">CAN'T MAKE IT</button></div></div>
+        <div class="rf" id="rcnt-rf" style="display:none"><div class="rl"><span class="n">3</span>NO. OF ATTENDANCE</div><div class="cnt-ctrl"><button type="button" class="cnt-btn" onclick="adjCnt(-1)">&#8722;</button><input type="text" class="cnt-val" id="rcnt" value="1" readonly><button type="button" class="cnt-btn" onclick="adjCnt(1)">+</button></div></div>
+        <button class="rsub" id="rsbtn" onclick="subRsvp()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg><span>CONFIRM RSVP</span></button>
+      </div>
+      <div class="rok" id="rok"><div class="ck">&#10003;</div><h3>Thank You!</h3><p id="rokmsg">Your RSVP received with love.</p></div>
+    </div>
+  </section>
+
+  <!-- WISHES -->
+  <section class="ws">
+    <div class="reveal" style="text-align:center">
+      <div class="ey">— SEND YOUR LOVE —</div>
+      <h2 class="st">Wishes Wall</h2>
+      <div class="wf">
+        <input class="wi" id="wn" placeholder="Your name">
+        <textarea class="wi" id="wm" rows="3" placeholder="Write a warm wish..."></textarea>
+        <button class="wsb" onclick="sendW()">SEND WISH &#10022;</button>
+      </div>
+      <div id="wwrap"><div id="wgrid"></div></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <section id="mapSection" class="evs reveal" style="display:none">
+  <div style="text-align:center">
+    <div class="ey">&#9670; VENUE &#9670;</div>
+    <div class="st" style="margin-bottom:20px">Find Your Way</div>
+    <div style="border-radius:14px;overflow:hidden;border:1px solid var(--rule);box-shadow:var(--sm)"><iframe id="mapFrame" src="about:blank" width="100%" height="400" style="border:0;display:block" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" allow="fullscreen"></iframe></div>
+    <div id="map-err" style="display:none;margin-top:12px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.18em;color:var(--maroon);opacity:.75">⚠ Use the Google Maps embed URL — Maps &gt; Share &gt; Embed a map &gt; copy src="..." value</div>
+  </div>
+</section>
+<footer class="ft">
+    <div class="fti" id="fti">A &nbsp;&#183;&nbsp; K</div>
+<div class="ftn" id="ftn">Arjun &amp; Kajal</div>
+    <div class="ftd" id="ftd">12 December 2026</div>
+    <div class="ftv" id="ftv">The Grand Palace, New Delhi</div>
+    <div class="ftb">Lovingly crafted by <a href="https://syncandstyle.com" target="_blank" rel="noopener" style="color:rgba(201,169,110,.7);text-decoration:none;border-bottom:1px solid rgba(201,169,110,.3);padding-bottom:1px">syncandstyle.com</a></div>
+  </footer>
+
+</div><!-- /main-inv -->
+
+
+<!-- QR SHARE CARD -->
+<div id="qr-ov" onclick="if(event.target.id==='qr-ov')closeQR()">
+<div id="qr-wrap"><div id="qr-card">
+<button class="qc-x" onclick="closeQR()">&times;</button>
+<div class="qc-ey">&#9670; WEDDING INVITATION &#9670;</div>
+<div class="qc-nm" id="qc-groom">Groom</div>
+<span class="qc-amp">&amp;</span>
+<div class="qc-nm" id="qc-bride">Bride</div>
+<div class="qc-ln"><span></span><i></i><span></span></div>
+<div class="qc-dt" id="qc-date"></div>
+<div class="qc-vn" id="qc-venue"></div>
+<div id="qr-cv-wrap"><canvas id="qr-cv" width="140" height="140"></canvas></div>
+<div class="qc-sc">SCAN TO VIEW INVITATION</div>
+<div class="qc-acts">
+<button class="qc-b p" onclick="dlQRCard()">DOWNLOAD CARD</button>
+<button class="qc-b p" onclick="shQRCard()">SHARE CARD</button>
+<button class="qc-b" onclick="cpLink()">COPY LINK</button>
+</div>
+</div></div>
+</div>
+
+<!-- EDIT SIDEBAR -->
+<div id="eov" onclick="closeES()"></div>
+<div id="esb">
+  <div class="esh"><span class="esht">&#9998; EDIT INVITATION</span><button class="escl" onclick="closeES()">&times;</button></div>
+  <div class="ess"><div class="essh" onclick="esT(this)"><span>COUPLE &amp; DATE</span><span class="esca">&#9660;</span></div><div class="esbd op">
+        <div class="esrw"><div class="eslb">GROOM'S NAME</div><div class="esfi"><input class="esin" id="esg" placeholder="Groom" oninput="lv('groom_name',this.value)"><button class="esdl" onclick="lv('groom_name','');this.previousElementSibling.value=''">&#10005;</button></div></div>
+<div class="esrw"><div class="eslb">BRIDE'S NAME</div><div class="esfi"><input class="esin" id="esb_" placeholder="Bride" oninput="lv('bride_name',this.value)"><button class="esdl" onclick="lv('bride_name','');this.previousElementSibling.value=''">&#10005;</button></div></div>
+<div class="esrw"><div class="eslb">WEDDING DATE</div><div class="esfi"><input type="date" class="esin" id="esdi" style="font-family:inherit;color:inherit" oninput="lv('date_iso',this.value);if(this.value){var d=new Date(this.value+'T12:00');lv('date_display',d.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}))}"></div></div>
+<div class="esrw"><div class="eslb">EVENT TIME</div><div class="esfi"><input type="time" class="esin" id="estm" style="font-family:inherit;color:inherit" oninput="lv('event_time',this.value)"></div></div>
+    <div class="esrw"><div class="eslb">VENUE / CITY</div><div class="esfi"><input class="esin" id="esv" placeholder="Venue, City" oninput="lv('venue',this.value)"><button class="esdl" onclick="lv('venue','');this.previousElementSibling.value=''">&#10005;</button></div></div>
+    <div class="esrw"><div class="eslb">RSVP DEADLINE</div><div class="esfi"><input class="esin" id="esrd" placeholder="22 Aug 2026" oninput="lv('rsvp_deadline',this.value)"><button class="esdl" onclick="lv('rsvp_deadline','');this.previousElementSibling.value=''">&#10005;</button></div></div>
+  </div></div>
+  <div class="ess"><div class="essh" onclick="esT(this)"><span>EVENTS</span><span class="esca">&#9660;</span></div><div class="esbd" id="esEvBd"></div></div>
+  <div class="ess"><div class="essh" onclick="esT(this)"><span>LOVE STORY</span><span class="esca">&#9660;</span></div><div class="esbd"><div class="esrw"><div class="eslb">STORY INTRO</div><div class="esfi"><input class="esin" id="essl" placeholder="A beautiful love story..." oninput="lv('story_lede',this.value)"><button class="esdl" onclick="lv('story_lede','');this.previousElementSibling.value=''">&#10005;</button></div></div><div id="esStBd"></div></div></div>
+  <div class="ess"><div class="essh" onclick="esT(this)"><span>FAMILY DETAILS</span><span class="esca">&#9660;</span></div><div class="esbd">
+<div style="font-family:Cinzel,serif;font-size:7px;letter-spacing:.18em;color:var(--gold);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(154,123,58,.12)">GROOM'S FAMILY</div>
+<div class="esrw"><div class="eslb">GROOM'S PARENTS</div><div class="esfi"><input class="esin" id="es-gparents" placeholder="Father &amp; Mother" oninput="lv('fm_gparents',this.value)"><button class="esdl" onclick="lv('fm_gparents','');this.previousElementSibling.value=''">&#10005;</button></div></div>
+<div class="esrw"><div class="eslb">GROOM'S VILLAGE / CITY</div><div class="esfi"><input class="esin" id="es-gplace" placeholder="Village / City" oninput="lv('fm_gplace',this.value)"><button class="esdl" onclick="lv('fm_gplace','');this.previousElementSibling.value=''">&#10005;</button></div></div>
+<div style="font-family:Cinzel,serif;font-size:7px;letter-spacing:.18em;color:var(--gold);margin-top:14px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(154,123,58,.12)">BRIDE'S FAMILY</div>
+<div class="esrw"><div class="eslb">BRIDE'S PARENTS</div><div class="esfi"><input class="esin" id="es-bparents" placeholder="Father &amp; Mother" oninput="lv('fm_bparents',this.value)"><button class="esdl" onclick="lv('fm_bparents','');this.previousElementSibling.value=''">&#10005;</button></div></div>
+<div class="esrw"><div class="eslb">BRIDE'S VILLAGE / CITY</div><div class="esfi"><input class="esin" id="es-bplace" placeholder="Village / City" oninput="lv('fm_bplace',this.value)"><button class="esdl" onclick="lv('fm_bplace','');this.previousElementSibling.value=''">&#10005;</button></div></div>
+</div></div>
+<div class="ess"><div class="essh" onclick="esT(this)"><span>BACKGROUND AUDIO</span><span class="esca">&#9660;</span></div><div class="esbd">
+<div class="esrw"><div class="eslb">PASTE MP3 URL</div><div class="esfi"><input class="esin" id="esAudio" placeholder="https://example.com/song.mp3" oninput="lv('audio_url',this.value)"></div></div>
+<div class="esrw"><div class="eslb">OR UPLOAD AUDIO FILE</div><div class="esfi"><label class="esdl" style="cursor:pointer;padding:7px 12px;font-size:8px;letter-spacing:.15em;white-space:nowrap">&#9654; CHOOSE FILE<input type="file" accept=".mp3,audio/mpeg" style="display:none" onchange="uploadAudioFile(this)"></label><span id="esAudioName" style="font-size:10px;color:var(--muted);margin-left:8px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span></div></div>
+</div></div>
+<div class="ess"><div class="essh" onclick="esT(this)"><span>VENUE MAP</span><span class="esca">&#9660;</span></div><div class="esbd">
+<div class="esrw"><div class="eslb">GOOGLE MAPS EMBED URL</div><div class="esfi"><input class="esin" id="esMapEmbed" placeholder="https://www.google.com/maps/embed?..." oninput="lv('map_embed',this.value)"></div></div>
+<div class="esrw" style="padding:6px 0"><div class="eslb" style="font-size:9px;color:rgba(154,123,58,.45);line-height:1.5">Paste the full embed code from Google Maps &#8594; Share &#8594; Embed a map (or just the src=&quot;...&quot; URL)</div></div>
+</div></div>
+<div class="esrw" style="margin-top:14px;padding-top:10px;border-top:1px dashed rgba(154,123,58,.2)"><button class="esdl" style="width:100%;border-radius:9px;padding:9px;font-size:.66rem;letter-spacing:.06em;color:var(--maroon);border-color:rgba(143,57,20,.3)" onclick="if(confirm('Reset all details to default?')){localStorage.removeItem('wedding_invitation_data');wd={...DEF};updateUI({...DEF});popES();showT('RESET TO DEFAULTS');}">↺ RESET TO DEFAULTS</button></div><div class="esft"><div class="esfn">CHANGES SAVE WHEN YOU CLOSE</div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Global state ── */
+window.__editSystem = {
+  invId: null, invitation: null, isOwner: false, isAdmin: false,
+  adminViewUser: null, sb: null, token: null, mode: null, slug: null,
+};
+
+let _sb=null,om=false,idata=null,wd={},iid=null,att=null,lk=null,rwts=null,cdt=null,_audioPending=false;
+const uP=new URLSearchParams(location.search);
+const GN=(uP.get('guest')||'').trim();
+const DEF={
+  bride_name:'Kajal',
+  groom_name:'Arjun',
+  date_display:'12 December 2026',
+  date_iso:'2026-12-12',
+  event_time:'10:00 AM',
+  venue:'The Grand Palace, New Delhi',
+  story_lede:'Two souls, one destiny — written in the stars and celebrated with love.',
+  rsvp_deadline:'30 November 2026',
+  fm_gparents:'Mr. Rajesh Sharma & Mrs. Sunita Sharma',
+  fm_gplace:'New Delhi',
+  fm_bparents:'Mr. Suresh Verma & Mrs. Anita Verma',
+  fm_bplace:'Jaipur, Rajasthan',
+  events:[
+    {name:'Haldi & Mehendi',date:'10 December 2026',time:'03:30 PM',venue:'Sunlit Courtyard',address:'The Grand Palace, New Delhi',map_url:'https://maps.google.com/?q=New+Delhi'},
+    {name:'Sangeet & Musical Night',date:'11 December 2026',time:'07:00 PM',venue:'Crystal Ballroom',address:'The Grand Palace, New Delhi',map_url:'https://maps.google.com/?q=New+Delhi'},
+    {name:'Wedding Ceremony (Phere)',date:'12 December 2026',time:'10:00 AM',venue:'Royal Mandapam',address:'The Grand Palace, New Delhi',map_url:'https://maps.google.com/?q=New+Delhi'},
+    {name:'Grand Reception Dinner',date:'12 December 2026',time:'07:30 PM',venue:'Imperial Heritage Hall',address:'The Grand Palace, New Delhi',map_url:'https://maps.google.com/?q=New+Delhi'}
+  ],
+  story:[
+    {year:'2021',label:'HOW WE MET',text:'It started with a chance encounter at a lively cafe in Delhi. What was supposed to be a brief coffee turned into hours of endless conversation, shared dreams, and an instant connection.',image:''},
+    {year:'2023',label:'THE PROPOSAL',text:'Under a starry night sky by the serene lakes of Udaipur, Arjun went down on one knee with a ring in hand. Surrounded by soft candlelight, Kajal smiled through happy tears and said Yes!',image:''},
+    {year:'2026',label:'THE BIG DAY',text:'With the holy blessings of our loving parents and elders, we are uniting our hearts in sacred vows. We warmly welcome you to celebrate this blessed beginning with us.',image:''}
+  ]
+};
+
+/* ── Thumbnail styles (dashboard card) — hero only, no chrome ── */
+function injectThumbStyles(){
+  document.documentElement.classList.add('thumb-mode');
+  const st=document.createElement('style');
+  st.id='tp4-thumb-style';
+  st.textContent=`
+    html.thumb-mode,html.thumb-mode body{overflow:hidden!important;height:100svh!important;background:#fdf5ec!important;}
+    html.thumb-mode #opening,html.thumb-mode #prv,html.thumb-mode #stt0,html.thumb-mode #stt2,html.thumb-mode #vpb,html.thumb-mode #vid-loader{display:none!important;}
+    html.thumb-mode #main-inv{display:block!important;opacity:1!important;transform:none!important;}
+    html.thumb-mode #own,html.thumb-mode #owner-control-bar,html.thumb-mode #share-always,html.thumb-mode #mute-btn,html.thumb-mode #sticky-initials,html.thumb-mode #today-date,html.thumb-mode #scroll-hint{display:none!important;}
+    html.thumb-mode .cds,html.thumb-mode .evs,html.thumb-mode .sts,html.thumb-mode .fms,html.thumb-mode .rs,html.thumb-mode .ws,html.thumb-mode #mapSection,html.thumb-mode .ft,html.thumb-mode .dv{display:none!important;}
+    html.thumb-mode .hs{min-height:100svh!important;}
+  `;
+  (document.head||document.documentElement).appendChild(st);
+}
+
+/* ── Mode Router (mirrors tp7) ── */
+(async function initModeRouter() {
+  const urlParams     = new URLSearchParams(window.location.search);
+  const invId         = urlParams.get('id') || urlParams.get('invitation_id') || null;
+  const previewMode   = urlParams.get('preview') === '1' || urlParams.get('preview') === 'true';
+  const publishIntent = urlParams.get('publish') === '1';
+  const thumbMode     = urlParams.get('thumb') === '1';
+  if (thumbMode) window.__thumb = true;
+
+  const enterPreview = () => {
+    document.body.classList.add('preview-mode');
+    const pc=document.getElementById('pcnt'); if(pc)pc.style.clipPath='inset(0% 0 0% 0)';
+  };
+  const renderThumb = (d) => { injectThumbStyles(); updateUI(d||{...DEF}); };
+  const applyDefaults = () => {
+    initOM();
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem('wedding_invitation_data'));
+      // If previous storage contained placeholder "Groom" / "Bride", overwrite with Arjun & Kajal
+      if (saved && (saved.groom_name === 'Groom' || saved.bride_name === 'Bride')) {
+        saved = null;
+        localStorage.removeItem('wedding_invitation_data');
+      }
+    } catch(e){}
+    const initialData = saved ? { ...DEF, ...saved } : { ...DEF };
+    updateUI(initialData);
+    setupVideo();
+    let savedWishes = null;
+    try { savedWishes = JSON.parse(localStorage.getItem('wedding_wishes_data')); } catch(e){}
+    renderWishes(savedWishes || [
+      { id: 'w1', guest_name: 'Rahul & Neha', message: 'Heartiest congratulations Arjun and Kajal! Wishing you both a lifetime of immense joy, laughter, and endless love!', likes: 12 },
+      { id: 'w2', guest_name: 'Sharma Family', message: 'May God shower his choicest blessings upon you both as you begin this sacred journey together. So proud of you Arjun & Kajal!', likes: 9 },
+      { id: 'w3', guest_name: 'Priyansh (Best Man)', message: 'Super excited to dance at the Sangeet! Can not wait to celebrate the grand wedding of the year!', likes: 7 },
+      { id: 'w4', guest_name: 'Sunita Bua & Family', message: 'Wishing the wonderful couple eternal togetherness and boundless happiness. Lots of love and prayers!', likes: 5 }
+    ]);
+  };
+
+  // Pre-resolved render (subdomain / pretty path): slug.html injected the invitation
+  if (window.__preloadedInvitation && !invId) {
+    const invitation = window.__preloadedInvitation;
+    window.__editSystem.mode='public';
+    window.__editSystem.invitation=invitation;
+    window.__editSystem.invId=invitation.id;
+    window.__editSystem.slug=invitation.slug||null;
+    iid=invitation.id; idata=invitation;
+    const d={...DEF,...(invitation.wedding_details||{})}; wd=d;
+    const run=()=>{
+      if(thumbMode){renderThumb(d);return;}
+      if(previewMode){updateUI(d);enterPreview();return;}
+      updateUI(d); setupVideo();
+      if(GN){const el=document.getElementById('rn');if(el)el.value=GN;}
+      renderWishes(invitation.wishes||[]);
+    };
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run); else run();
+    return;
+  }
+
+  let slug = urlParams.get('slug') || null;
+  if (!slug && !invId) {
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    let pathSlug  = pathParts.length >= 2 ? pathParts[pathParts.length - 1] : null;
+    if (pathSlug) pathSlug = pathSlug.replace(/\.html$/i, '');
+    // A named template file (t4, t4.html, tp1, slug) is NOT an invitation slug.
+    // Treating it as one sent template previews (?preview=true) into a public
+    // fetch that 404s and fell back to the video loader instead of preview mode.
+    if (pathSlug && !/^t\d+$/i.test(pathSlug) && !/^tp\d+$/i.test(pathSlug) && pathSlug !== 'slug') {
+      slug = pathSlug;
+    }
+  }
+  if (slug && !invId && urlParams.get('slug')) {
+    history.replaceState(null, '', '/templates/' + encodeURIComponent(slug));
+  }
+
+  let apiUrl = '';
+  if (invId) {
+    apiUrl = '/api/get-invitation?id=' + encodeURIComponent(invId);
+  } else if (slug) {
+    apiUrl = '/api/get-invitation?slug=' + encodeURIComponent(slug);
+  } else {
+    // No id or slug — show defaults
+    document.addEventListener('DOMContentLoaded', function() {
+      if (thumbMode) { renderThumb({...DEF}); return; }
+      if (previewMode){ updateUI({...DEF}); enterPreview(); return; }
+      applyDefaults();
+    });
+    return;
+  }
+
+  // ── PUBLIC / GUEST MODE (slug, no id) ──
+  if (!invId && slug) {
+    window.__editSystem.mode = 'public';
+    window.__editSystem.slug = slug;
+    try {
+      const res = await fetch(apiUrl + '&wishes=true');
+      if (!res.ok) {
+        document.addEventListener('DOMContentLoaded', function(){ if(thumbMode){renderThumb({...DEF});return;} applyDefaults(); });
+        return;
+      }
+      const { invitation, wishes: wishList } = await res.json();
+      if (!invitation) { document.addEventListener('DOMContentLoaded', function(){ if(thumbMode){renderThumb({...DEF});return;} applyDefaults(); }); return; }
+      window.__editSystem.invitation = invitation;
+      window.__editSystem.invId      = invitation.id;
+      window.__editSystem.slug       = invitation.slug || slug;
+      iid = invitation.id;
+      idata = invitation;
+      const d = {...DEF, ...(invitation.wedding_details || {})};
+      wd = d;
+      const run = () => {
+        if (thumbMode) { renderThumb(d); return; }
+        if (previewMode){ updateUI(d); enterPreview(); return; }
+        updateUI(d); setupVideo();
+        if(GN){const el=document.getElementById('rn');if(el)el.value=GN;}
+        renderWishes(wishList || []);
+      };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+      else run();
+    } catch(e) {
+      document.addEventListener('DOMContentLoaded', function(){ applyDefaults(); });
+    }
+    return;
+  }
+
+  // ── OWNER MODE (id in URL) ──
+  window.__editSystem.invId = invId;
+  window.__editSystem.mode  = 'owner';
+  iid = invId;
+
+  let token = null, sb = null;
+  try {
+    const cfgRes = await fetch('/api/config');
+    if (!cfgRes.ok) throw new Error('config failed');
+    const cfg = await cfgRes.json();
+    sb  = supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    _sb = sb;
+    window.__editSystem.sb = sb;
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      token = session.access_token;
+      window.__editSystem.token = token;
+      await sb.auth.setSession({ access_token: session.access_token, refresh_token: session.refresh_token });
+    }
+  } catch(e) {
+    document.addEventListener('DOMContentLoaded', function(){ applyDefaults(); });
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/get-invitation?id=' + encodeURIComponent(invId) + '&wishes=true', {
+      headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+    });
+    if (!res.ok) { document.addEventListener('DOMContentLoaded', function(){ applyDefaults(); }); return; }
+    const { invitation, is_owner, is_admin, wishes: wishList } = await res.json();
+
+    if (!is_owner && !is_admin) {
+      // Non-owner visiting ?id= URL → redirect to slug URL
+      if (invitation && invitation.slug) {
+        window.location.replace('/templates/' + invitation.slug);
+      }
+      return;
+    }
+
+    window.__editSystem.invitation = invitation;
+    window.__editSystem.isOwner    = is_owner;
+    window.__editSystem.isAdmin    = !!is_admin;
+    window.__editSystem.slug       = invitation.slug || null;
+    idata = invitation;
+    const d = {...DEF, ...(invitation.wedding_details || {})};
+    wd = d;
+
+    const run = () => {
+      if (thumbMode) { renderThumb(d); return; }
+      if (previewMode){ updateUI(d); enterPreview(); return; }
+      updateUI(d); setupVideo();
+      if(GN){const el=document.getElementById('rn');if(el)el.value=GN;}
+      showOwner();
+      renderWishes(wishList || []);
+      if (publishIntent) setTimeout(()=>{ try{ publishInvitation(); }catch(e){} }, 800);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+    else run();
+  } catch(e) {
+    document.addEventListener('DOMContentLoaded', function(){ applyDefaults(); });
+  }
+})();
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+function s(id,v){const el=document.getElementById(id);if(el)el.textContent=v||'';}
+
+function updateUI(d){
+  wd={...wd,...d};const w=wd;
+  // Auto-derive date_display from date_iso if missing
+  if(w.date_iso&&(!w.date_display||w.date_display==='DD \u00b7 MM \u00b7 YYYY')){var _dd=new Date(w.date_iso+'T12:00');if(!isNaN(_dd.getTime())){w.date_display=_dd.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});wd.date_display=w.date_display;}}
+  // Opening screen — update split Bride/Groom spans
+  const brEl2=document.getElementById('pc-bride');
+  const grEl2=document.getElementById('pc-groom');
+  if(brEl2)brEl2.textContent=(w.bride_name||'Bride');
+  if(grEl2)grEl2.textContent=(w.groom_name||'Groom');
+  s('pc-date',w.date_display||'DD \u00b7 MM \u00b7 YYYY');s('pc-venue',w.venue||'');
+  // Hero
+  s('h-bride',w.bride_name||'Bride');s('h-groom',w.groom_name||'Groom');
+  s('h-date',w.date_display||'DD \u00b7 MM \u00b7 YYYY');s('h-venue',w.venue||'');
+  // Sticky initials
+  var _si2=document.getElementById('sticky-initials');if(_si2)_si2.textContent=(w.groom_name||'G').charAt(0)+' \u00b7 '+(w.bride_name||'B').charAt(0);
+  // Footer
+  s('fti',(w.groom_name||'G').charAt(0)+' \u00b7 '+(w.bride_name||'B').charAt(0));
+  s('ftn',(w.groom_name||'Groom')+' & '+(w.bride_name||'Bride'));
+  s('ftd',w.date_display||'DD \u00b7 MM \u00b7 YYYY');s('ftv',w.venue||'');
+  // Other
+  s('stled',w.story_lede||'');s('rdl',w.rsvp_deadline||'the deadline');
+  // Family — names auto-fill from couple details; extras from saved data
+  s('fm-groom',w.groom_name||'Groom Name');
+  s('fm-bride2',w.bride_name||'Bride Name');
+  if(w.fm_gparents!==undefined)s('fm-gparents',w.fm_gparents||'Father & Mother');
+  if(w.fm_gplace!==undefined)s('fm-gplace',w.fm_gplace||'Village / City');
+  if(w.fm_bparents!==undefined)s('fm-bparents',w.fm_bparents||'Father & Mother');
+  if(w.fm_bplace!==undefined)s('fm-bplace',w.fm_bplace||'Village / City');
+  document.title=(w.groom_name||'Groom')+' & '+(w.bride_name||'Bride')+' \u2014 Wedding Invitation';
+  updateFavicon();
+  renderEvs(w.events||DEF.events);renderStory(w.story||DEF.story);
+  if(w.date_iso)startCD(w.date_iso);
+  
+  if(w.audio_url)updateAudio(w.audio_url);
+  if(w.map_embed)updateMap(w.map_embed);
+}
+
+/* PAPER ROLL STATE MACHINE: 0→1→2→3 */
+let vs=0;
+let _vidFirstFrame=false,_vidPlayable=false,_pendingPlay=false,_vidError=false,_pendingTimer=null;
+function _setVidLoading(on){var l=document.getElementById('vid-loader');if(l)l.classList.toggle('show',!!on);}
+function _revealPrompt(){var o=document.getElementById('opening');if(o)o.classList.add('vready');}
+function _startRoll(vid){
+  _setVidLoading(false);
+  var s0=document.getElementById('stt0');if(s0)s0.classList.add('gone');
+  var s2=document.getElementById('stt2');if(s2)s2.classList.add('vis');
+  vs=1;
+  if(vid && vid.play){
+    vid.play().catch(function(){_skipRoll();});
+  } else {
+    _skipRoll();
+  }
+}
+/* Fallback when the paper-roll video can't play/buffer: snap straight to the
+   opened-paper state so the guest can still tap through to the invitation. */
+function _skipRoll(){
+  _setVidLoading(false);
+  var pc=document.getElementById('pcnt');if(pc)pc.classList.add('vis');
+  ['pc-eyebrow','pc-div1','pc-bride','pc-and','pc-groom','pc-div2','pc-date','pc-venue']
+    .forEach(function(id){var e=document.getElementById(id);if(e)e.style.opacity='1';});
+  var s0=document.getElementById('stt0');if(s0)s0.classList.add('gone');
+  var s2=document.getElementById('stt2');if(s2)s2.classList.add('vis');
+  if(vs<2)vs=2;
+}
+function _checkPlayable(vid){
+  if(_vidPlayable)return true;
+  var enough=vid.readyState>=4;
+  if(!enough){try{var b=vid.buffered;if(b&&b.length&&b.end(b.length-1)>=4.5)enough=true;}catch(e){}}
+  if(enough){_vidPlayable=true;if(_pendingPlay){_pendingPlay=false;_startRoll(vid);}}
+  return _vidPlayable;
+}
+function setupVideo(){
+  const vid=document.getElementById('prv'),prog=document.getElementById('vpb');
+  _setVidLoading(true);
+  // First frame available → seek to 0.2s (paper closed), reveal prompt, hide loader
+  function firstFrame(){
+    if(vs===0&&vid.currentTime<0.1){try{vid.currentTime=0.2;}catch(e){}}
+    if(!_vidFirstFrame){_vidFirstFrame=true;vid.classList.add('rdy');_revealPrompt();if(!_pendingPlay)_setVidLoading(false);}
+  }
+  vid.addEventListener('loadeddata',firstFrame);
+  vid.addEventListener('canplay',firstFrame);
+  vid.addEventListener('seeked',function(){if(vs<=1&&!vid.classList.contains('rdy'))vid.classList.add('rdy');});
+  // Enough buffered to unroll smoothly (text reveal is driven by playback, so never let it outrun the video)
+  vid.addEventListener('canplaythrough',function(){_vidPlayable=true;if(_pendingPlay){_pendingPlay=false;_startRoll(vid);}});
+  vid.addEventListener('progress',function(){_checkPlayable(vid);});
+  // Video missing / 404 / decode error → never strand the guest on the spinner
+  vid.addEventListener('error',function(){_vidError=true;_revealPrompt();if(_pendingPlay){_pendingPlay=false;clearTimeout(_pendingTimer);_skipRoll();}else{_setVidLoading(false);}});
+  // Safety: never strand the user on the spinner if media events are flaky
+  setTimeout(function(){if(!_vidFirstFrame){_vidFirstFrame=true;_revealPrompt();if(!_pendingPlay)_setVidLoading(false);}},3000);
+  vid.addEventListener('timeupdate',function(){
+    if(!vid.duration)return;
+    const p=vid.currentTime/vid.duration;
+    prog.style.width=(p*100)+'%';
+    // Paper opens: absolute time 0.6s → 4.2s (smooth cinematic reveal)
+    const ct=vid.currentTime,tS=0.6,tE=4.2;
+    if(ct>=tS){
+      const rawT=Math.min(1,(ct-tS)/(tE-tS));
+      // Cosine ease-in-out: starts slow, accelerates, finishes slow
+      const eased=(1-Math.cos(rawT*Math.PI))/2;
+      const clip=50*(1-eased);
+      document.getElementById('pcnt').style.clipPath='inset('+clip+'% 0 '+clip+'% 0)';
+      // Pure clip-path reveal: text at full opacity always, clip controls visibility
+      // Clip opens from center → outward (up + down), cosine-eased for smooth expansion
+      ['pc-and','pc-bride','pc-groom','pc-div1','pc-div2','pc-eyebrow','pc-date','pc-venue']
+        .forEach(function(id){var e=document.getElementById(id);if(e)e.style.opacity='1';});
+    }
+  });
+  vid.addEventListener('ended',function(){
+    document.getElementById('pcnt').classList.add('vis');
+    document.getElementById('stt2').classList.add('vis');
+    // Snap all paper text to full opacity at video end
+    ['pc-eyebrow','pc-div1','pc-bride','pc-and','pc-groom','pc-div2','pc-date','pc-venue']
+      .forEach(function(id){var e=document.getElementById(id);if(e)e.style.opacity='1';});
+    vs=2;
+  });
+  // Kick off buffering immediately
+  try{vid.load();}catch(e){}
+  // Video starts paused — user must tap to play
+}
+function tap(){
+  if(vs===0){
+    initMusic();
+    var v=document.getElementById('prv');
+    _startRoll(v);
+  }
+  else if(vs===1||vs===2){openInv();}
+}
+window.addEventListener('scroll',function(){var sh=document.getElementById('scroll-hint');if(sh){if(window.scrollY>60)sh.classList.add('hide');else sh.classList.remove('hide');}},{ passive:true});
+function openInv(){
+  vs=3;
+  var _td=document.getElementById('today-date');if(_td){var _n=new Date();_td.textContent=_n.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}).toUpperCase();}
+  document.getElementById('opening').classList.add('away');
+  const m=document.getElementById('main-inv');m.classList.add('show');
+  document.body.classList.add('io');document.body.style.overflow='auto';
+  // Double rAF: wait for display:block to be rendered, then trigger transition
+  requestAnimationFrame(function(){requestAnimationFrame(function(){m.classList.add('show-in');});});
+  initOM();
+  var _si=document.getElementById('sticky-initials');
+  if(_si)_si.textContent=(wd.groom_name||'G').charAt(0)+' \u00b7 '+(wd.bride_name||'B').charAt(0);
+  var _hs=document.querySelector('.hs');
+  if(_hs&&_si){var _hio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)_si.classList.remove('vis');else _si.classList.add('vis');});},{threshold:0.05});_hio.observe(_hs);}
+  setTimeout(function(){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('on');}),{threshold:.1});document.querySelectorAll('.reveal').forEach(el=>io.observe(el));},120);
+  if(typeof loadW==='function')loadW();if(GN)checkRsvp();
+}
+
+/* OWNER */
+function showOwner(){
+  om=true;
+  window.__editSystem.isOwner=true;
+  // Guest share button is replaced by the owner control bar
+  var sa=document.getElementById('share-always'); if(sa)sa.style.display='none';
+  injectOwnerChrome();
+}
+
+/* ── OWNER CHROME — Sync & Style control bar + index-aesthetic editor ── */
+function injectOwnerChrome(){
+  if(document.getElementById('owner-control-bar'))return;
+  if(!document.getElementById('ss-owner-font')){
+    const fl=document.createElement('link');fl.id='ss-owner-font';fl.rel='stylesheet';
+    fl.href='https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap';
+    document.head.appendChild(fl);
+  }
+  const style=document.createElement('style');
+  style.id='owner-chrome-style';
+  style.textContent=`
+    #owner-control-bar{position:fixed;top:0;left:0;right:0;z-index:9995;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.55rem 1.15rem;font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:rgba(245,244,239,.88);-webkit-backdrop-filter:saturate(1.4) blur(18px);backdrop-filter:saturate(1.4) blur(18px);border-bottom:1px solid rgba(12,12,12,.07);box-shadow:0 14px 34px -22px rgba(12,12,12,.4);transform:translateY(-100%);transition:transform .55s cubic-bezier(.2,.8,.2,1);}
+    #owner-control-bar.visible{transform:translateY(0);}
+    #owner-control-bar .ocb-left{display:flex;align-items:center;gap:.8rem;min-width:0;flex:1 1 auto;overflow:hidden;}
+    #owner-control-bar .ocb-right{display:flex;align-items:center;gap:.3rem;flex:0 0 auto;}
+    #owner-control-bar .ocb-brand{font-weight:600;font-size:.82rem;letter-spacing:-.012em;color:#0c0c0c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #owner-control-bar .ocb-divider{width:1px;height:17px;background:rgba(12,12,12,.13);flex-shrink:0;}
+    #owner-control-bar .ocb-status{display:inline-flex;align-items:center;gap:.42rem;font-size:.68rem;font-weight:500;color:rgba(12,12,12,.6);white-space:nowrap;flex-shrink:0;}
+    #owner-control-bar .ocb-status .dot{width:6px;height:6px;border-radius:50%;background:rgba(12,12,12,.3);flex-shrink:0;}
+    #owner-control-bar .ocb-status.is-draft .dot{background:#c79a3b;}
+    #owner-control-bar .ocb-status.is-published .dot{background:#3f9c63;}
+    #owner-control-bar .ocb-status.is-pending .dot{background:#d97706;animation:ocbPulse 1.6s infinite;}
+    #owner-control-bar .ocb-badge{font-size:.56rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:.28rem .6rem;border-radius:100px;color:#8a5a18;background:rgba(217,151,6,.1);border:1px solid rgba(217,151,6,.22);white-space:nowrap;flex-shrink:0;}
+    #owner-control-bar .ocb-btn{display:inline-flex;align-items:center;gap:.4rem;font-family:'DM Sans',sans-serif;font-size:.76rem;font-weight:500;color:#0c0c0c;text-decoration:none;background:transparent;border:0;cursor:pointer;padding:.48rem .7rem;border-radius:100px;white-space:nowrap;transition:background .2s,color .2s;}
+    #owner-control-bar .ocb-btn:hover{background:rgba(12,12,12,.055);}
+    #owner-control-bar .ocb-btn.icon{padding:.5rem;color:rgba(12,12,12,.5);}
+    #owner-control-bar .ocb-btn.icon:hover{color:#0c0c0c;background:rgba(12,12,12,.055);}
+    #owner-control-bar .ocb-cta{display:inline-flex;align-items:center;gap:.45rem;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;color:#f5f4ef;background:#0c0c0c;border:0;cursor:pointer;padding:.6rem 1.3rem;border-radius:100px;white-space:nowrap;transition:opacity .2s,transform .15s;box-shadow:0 1px 2px rgba(12,12,12,.18);}
+    #owner-control-bar .ocb-cta:hover{opacity:.9;}
+    #owner-control-bar .ocb-cta:active{transform:translateY(1px);}
+    #owner-control-bar .ocb-cta:disabled{opacity:.35;cursor:default;box-shadow:none;}
+    #owner-control-bar .ocb-save-dot{width:6px;height:6px;border-radius:50%;background:rgba(12,12,12,.16);transition:background .4s;flex-shrink:0;margin:0 .3rem 0 .15rem;}
+    #owner-control-bar .ocb-save-dot.dirty{background:#d97706;animation:ocbPulse 1.5s infinite;}
+    #owner-control-bar .ocb-save-dot.saved{background:#3f9c63;}
+    #owner-control-bar .ocb-save-dot.error{background:#d64545;}
+    @keyframes ocbPulse{0%,100%{opacity:1}50%{opacity:.25}}
+    body.has-owner-bar #sticky-initials{top:44px;}
+    body.has-owner-bar #today-date{top:56px;}
+    @media(max-width:600px){#owner-control-bar .ocb-brand,#owner-control-bar .ocb-divider{display:none;}#owner-control-bar{padding:.5rem .8rem;}}
+    /* Editor sidebar → Sync & Style index aesthetic */
+    #esb{background:#f7f6f1!important;font-family:'DM Sans',system-ui,sans-serif!important;}
+    #esb .esh{background:#f7f6f1!important;color:#0c0c0c!important;border-bottom:1px solid rgba(12,12,12,.07)!important;}
+    #esb .esht{font-family:'DM Sans',sans-serif!important;font-weight:600!important;letter-spacing:-.01em!important;font-size:.95rem!important;text-transform:none!important;color:#0c0c0c!important;}
+    #esb .escl{color:rgba(12,12,12,.55)!important;}
+    #esb .ess{border-bottom:1px solid rgba(12,12,12,.07)!important;}
+    #esb .essh{background:rgba(12,12,12,.015)!important;color:rgba(12,12,12,.55)!important;font-family:'DM Sans',sans-serif!important;font-weight:600!important;letter-spacing:.12em!important;font-size:.62rem!important;}
+    #esb .esca{color:rgba(12,12,12,.4)!important;}
+    #esb .eslb{font-family:'DM Sans',sans-serif!important;color:rgba(12,12,12,.6)!important;letter-spacing:.04em!important;font-weight:500!important;font-size:.68rem!important;text-transform:none!important;}
+    #esb .esin{font-family:'DM Sans',sans-serif!important;color:#0c0c0c!important;background:#fff!important;border:1px solid rgba(12,12,12,.12)!important;border-radius:11px!important;font-size:.86rem!important;}
+    #esb .esin:focus{border-color:rgba(12,12,12,.55)!important;box-shadow:0 0 0 3px rgba(12,12,12,.06)!important;background:#fff!important;}
+    #esb .esdl{border:1px solid rgba(12,12,12,.12)!important;color:rgba(12,12,12,.45)!important;border-radius:9px!important;background:transparent!important;}
+    #esb .esdl:hover{border-color:rgba(214,69,69,.4)!important;color:#d64545!important;background:rgba(214,69,69,.05)!important;}
+    #esb .esft{position:sticky;bottom:0;background:#f7f6f1!important;border-top:1px solid rgba(12,12,12,.08)!important;display:flex;align-items:center;gap:.7rem;padding:.9rem 1.1rem!important;text-align:left!important;}
+    #esb .esb-save-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.8rem;border-radius:100px;border:0;background:#0c0c0c;color:#f5f4ef;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.02em;cursor:pointer;transition:opacity .2s,transform .15s;}
+    #esb .esb-save-btn:hover{opacity:.9;}
+    #esb .esb-save-btn:active{transform:translateY(1px);}
+    #esb .esb-save-btn:disabled{opacity:.45;cursor:default;}
+    #esb .esb-save-status{font-size:.66rem;color:rgba(12,12,12,.45);white-space:nowrap;}
+    #eov{background:rgba(12,12,12,.32)!important;}
+  `;
+  document.head.appendChild(style);
+
+  const es=window.__editSystem;
+  const bar=document.createElement('div');
+  bar.id='owner-control-bar';
+  bar.innerHTML=`
+    <div class="ocb-left">
+      <span class="ocb-brand">Sync &amp; Style</span>
+      <span class="ocb-divider"></span>
+      <span class="ocb-status" id="ocb-status"><span class="dot"></span><span id="ocb-status-text">Draft</span></span>
+      ${es.isAdmin?'<span class="ocb-badge">Admin</span>':''}
+    </div>
+    <div class="ocb-right">
+      <div class="ocb-save-dot" id="ocb-save-dot" title="Save status"></div>
+      <button class="ocb-btn" onclick="openES()">Edit</button>
+      <button class="ocb-btn icon" onclick="shareInv()" title="Share invitation" aria-label="Share invitation">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51L8.59 10.49"/></svg>
+      </button>
+      <a class="ocb-btn icon" href="https://app.syncandstyle.com" title="Dashboard" aria-label="Dashboard">
+        <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5V6a.5.5 0 0 1-1 0V4.5A.5.5 0 0 1 8 4zM3.732 5.732a.5.5 0 0 1 .707 0l.915.914a.5.5 0 1 1-.708.708l-.914-.915a.5.5 0 0 1 0-.707zM2 10a.5.5 0 0 1 .5-.5h1.586a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 10zm9.5 0a.5.5 0 0 1 .5-.5h1.5a.5.5 0 0 1 0 1H12a.5.5 0 0 1-.5-.5zm.754-4.246a.389.389 0 0 0-.527-.02L7.547 9.31a.91.91 0 1 0 1.302 1.258l3.434-4.297a.389.389 0 0 0-.029-.518z"/><path fill-rule="evenodd" d="M0 10a8 8 0 1 1 15.547 2.661c-.442 1.253-1.845 1.602-2.932 1.25C11.309 13.488 9.475 13 8 13c-1.474 0-3.31.488-4.615.911-1.087.352-2.49.003-2.932-1.25A7.988 7.988 0 0 1 0 10zm8-7a7 7 0 0 0-6.603 9.329c.203.575.923.876 1.68.63C4.397 12.533 6.358 12 8 12s3.604.532 4.923.96c.757.245 1.477-.056 1.68-.631A7 7 0 0 0 8 3z"/></svg>
+      </a>
+      <button class="ocb-cta" id="ocb-publish-btn" onclick="publishInvitation()"><span id="ocb-publish-label">Publish</span></button>
+    </div>
+  `;
+  document.body.prepend(bar);
+  document.body.classList.add('has-owner-bar');
+  setTimeout(()=>bar.classList.add('visible'),300);
+
+  // Upgrade the sidebar footer → Save Draft button + live save status
+  const ft=document.querySelector('#esb .esft');
+  if(ft){
+    ft.innerHTML='<button class="esb-save-btn" id="esb-save-btn" onclick="saveWD()">SAVE DRAFT</button><div class="esb-save-status" id="esb-save-status">All changes saved</div>';
+  }
+  refreshPublishUI();
+}
+
+function _getShareUrl(){
+  var es=window.__editSystem||{};
+  var inv=es.invitation;
+  var slug=(inv&&inv.slug)||es.slug;
+  if(slug&&slug.indexOf('http')===0)return slug;
+  var _u=new URL(location.href);_u.searchParams.delete('id');_u.searchParams.delete('invitation_id');return _u.toString();
+}
+function shareInv(){var w=wd;if(w.date_iso&&!w.date_display){var _d=new Date(w.date_iso+'T12:00');if(!isNaN(_d.getTime())){w.date_display=_d.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});wd.date_display=w.date_display;}}document.getElementById('qc-groom').textContent=w.groom_name||'Groom';document.getElementById('qc-bride').textContent=w.bride_name||'Bride';document.getElementById('qc-date').textContent=w.date_display||'';document.getElementById('qc-venue').textContent=w.venue||'';var url=_getShareUrl();try{var qr=qrcode(0,'M');qr.addData(url);qr.make();var cv=document.getElementById('qr-cv'),ctx=cv.getContext('2d'),mc=qr.getModuleCount(),sz=140,cs=sz/mc;ctx.clearRect(0,0,sz,sz);ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);for(var r=0;r<mc;r++)for(var c=0;c<mc;c++){ctx.fillStyle=qr.isDark(r,c)?'#8F3914':'#fff';ctx.fillRect(c*cs,r*cs,cs+.5,cs+.5);}}catch(e){}document.getElementById('qr-ov').classList.add('open');document.body.style.overflow='hidden';}
+function closeQR(){document.getElementById('qr-ov').classList.remove('open');document.body.style.overflow='';}
+function cpLink(){navigator.clipboard.writeText(_getShareUrl()).then(function(){showT('LINK COPIED \u2714');}).catch(function(){});}
+function _genQRC(){var w=wd;if(w.date_iso&&!w.date_display){var _d=new Date(w.date_iso+'T12:00');if(!isNaN(_d.getTime())){w.date_display=_d.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});wd.date_display=w.date_display;}}var cv=document.createElement('canvas'),W=720,H=80+65+38+44+38+34+(w.date_display?28:0)+(w.venue?44:16)+220+28+46+60;cv.width=W;cv.height=H;var ctx=cv.getContext('2d');var bg=ctx.createLinearGradient(0,0,W*.15,H);bg.addColorStop(0,'#fef9f5');bg.addColorStop(.5,'#f8f1ea');bg.addColorStop(1,'#f2e8df');ctx.fillStyle=bg;_rrect(ctx,0,0,W,H,32);ctx.fill();ctx.fillStyle='#9a7b3a';ctx.fillRect(0,0,W,6);ctx.strokeStyle='rgba(154,123,58,.22)';ctx.lineWidth=3;_rrect(ctx,0,0,W,H,32);ctx.stroke();var y=80;ctx.textAlign='center';ctx.fillStyle='rgba(154,123,58,.55)';ctx.font='12px Cinzel';ctx.fillText('\u25C6  WEDDING INVITATION  \u25C6',W/2,y);y+=65;ctx.fillStyle='#8F3914';ctx.font='56px Italiana';ctx.fillText(w.groom_name||'Groom',W/2,y);y+=38;ctx.font='italic 24px Playfair Display';ctx.fillText('&',W/2,y);y+=44;ctx.font='56px Italiana';ctx.fillText(w.bride_name||'Bride',W/2,y);y+=38;ctx.strokeStyle='rgba(154,123,58,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(W/2-90,y);ctx.lineTo(W/2-12,y);ctx.stroke();ctx.beginPath();ctx.moveTo(W/2+12,y);ctx.lineTo(W/2+90,y);ctx.stroke();ctx.beginPath();ctx.arc(W/2,y,3.5,0,Math.PI*2);ctx.fillStyle='#9a7b3a';ctx.fill();y+=34;if(w.date_display){ctx.font='14px Cinzel';ctx.fillStyle='#8F3914';ctx.fillText(w.date_display.toUpperCase(),W/2,y);y+=28;}if(w.venue){ctx.font='italic 20px Cormorant Garamond';ctx.fillStyle='rgba(143,57,20,.55)';ctx.fillText(w.venue,W/2,y);y+=44;}else{y+=16;}var qs=document.getElementById('qr-cv'),qSz=220;ctx.fillStyle='#fff';_rrect(ctx,W/2-qSz/2-14,y-6,qSz+28,qSz+28,10);ctx.fill();ctx.strokeStyle='rgba(154,123,58,.12)';ctx.lineWidth=1;_rrect(ctx,W/2-qSz/2-14,y-6,qSz+28,qSz+28,10);ctx.stroke();ctx.drawImage(qs,W/2-qSz/2,y+8,qSz,qSz);y+=qSz+46;ctx.font='10px Cinzel';ctx.fillStyle='rgba(154,123,58,.45)';ctx.fillText('SCAN TO VIEW INVITATION',W/2,y);return cv;}
+function dlQRCard(){var w=wd,cv=_genQRC();var a=document.createElement('a');a.download=(w.groom_name||'Groom')+'_'+(w.bride_name||'Bride')+'_wedding_QR.png';a.href=cv.toDataURL('image/png');a.click();showT('CARD DOWNLOADED \u2714');}
+
+function shQRCard(){
+  var w=wd;
+  var url=_getShareUrl();
+  var caption='You are invited to '+(w.groom_name||'Groom')+' & '+(w.bride_name||'Bride')+'\u2019s Wedding!\u000A\u000A'+url;
+  /* Always copy URL to clipboard so user can paste as WhatsApp caption */
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){showT('LINK COPIED \u2014 PASTE AS CAPTION \uD83D\uDCCB');}).catch(function(){});
+  }
+  var cv=_genQRC();
+  cv.toBlob(function(blob){
+    var fn=(w.groom_name||'Groom')+'_'+(w.bride_name||'Bride')+'_wedding_QR.png';
+    var file=new File([blob],fn,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({title:document.title,text:caption,files:[file]}).catch(function(){});
+    }else if(navigator.share){
+      navigator.share({title:document.title,text:caption,url:url}).catch(function(){});
+    }else{
+      dlQRCard();
+    }
+  },'image/png');
+}
+function _rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+
+/* EVENTS */
+function renderEvs(evs){
+  const c=document.getElementById('evsc');if(!c)return;
+  c.innerHTML=(evs||[]).map((ev,i)=>'<div class="evc"><div class="evh"><div class="evn">'+(i+1)+'</div><div class="evt">'+esc(ev.name||'')+'</div></div>'+
+    '<div class="evr"><div class="evi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div class="evb"><div class="evl">DATE &amp; TIME</div><div class="evv">'+esc(ev.date||'')+'</div><div class="evs2">'+esc(ev.time||'')+'</div></div></div>'+
+    '<div class="evr"><div class="evi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="evb"><div class="evl">VENUE</div><div class="evv">'+esc(ev.venue||'')+'</div><div class="evs2">'+esc(ev.address||'')+'</div></div></div>'+
+    '<div class="eva"><a class="eb ebp" href="'+esc(ev.map_url||'#')+'" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>DIRECTIONS</a>'+
+    '<button class="eb ebg" onclick="addC(\''+esc(ev.name)+'\',\''+esc(ev.venue)+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>CALENDAR</button></div></div>'
+  ).join('');}
+function addC(t,v){window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(t)+'&location='+encodeURIComponent(v||''),'_blank');}
+
+/* STORY */
+function renderStory(s_){
+  const c=document.getElementById('stln');if(!c)return;
+  c.innerHTML=(s_||[]).map((ch,i)=>{
+    const imgEl=ch.image?'<img class="simg" src="'+esc(ch.image)+'" alt="'+esc(ch.label||'Photo')+'" style="border-radius:8px;width:100%;aspect-ratio:4/3;object-fit:cover">':'<div class="simg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span class="simg-lbl">PHOTO</span></div>';const txt='<span class="syr">'+esc(ch.year||'')+'</span><span class="sloc">'+esc(ch.label||'')+'</span>'+imgEl+'<div class="stxt">'+esc(ch.text||'')+'</div>';
+    return i%2===0?'<div class="si"><div class="sl">'+txt+'</div><div class="sdc"><div class="sdot"></div></div><div class="se"></div></div>':
+                   '<div class="si"><div class="se"></div><div class="sdc"><div class="sdot"></div></div><div class="sr">'+txt+'</div></div>';
+  }).join('');}
+
+/* COUNTDOWN — live with seconds */
+function startCD(iso){
+  if(cdt)clearInterval(cdt);if(!iso)return;
+  var _prev={};
+  function _cdSet(id,v){
+    var el=document.getElementById(id);if(!el)return;
+    var nw=String(v),ol=(_prev[id]||'').padStart(nw.length,'0');_prev[id]=nw;
+    var h='';for(var d=0;d<nw.length;d++){h+='<span class="cdd'+(ol.charAt(d)!==nw.charAt(d)?' cda':'')+'">'+nw.charAt(d)+'</span>';}
+    el.innerHTML=h;
+  };
+  const tick=()=>{const d=new Date(iso).getTime()-Date.now();if(d<=0){['cd-d','cd-h','cd-m','cd-s'].forEach(x=>_cdSet(x,'0'));return;}_cdSet('cd-d',String(Math.floor(d/86400000)));_cdSet('cd-h',String(Math.floor((d%86400000)/3600000)).padStart(2,'0'));_cdSet('cd-m',String(Math.floor((d%3600000)/60000)).padStart(2,'0'));_cdSet('cd-s',String(Math.floor((d%60000)/1000)).padStart(2,'0'));};
+  tick();cdt=setInterval(tick,1000);
+}
+
+/* RSVP */
+function adjCnt(d){var el=document.getElementById('rcnt');var v=Math.max(1,Math.min(50,(parseInt(el.value)||1)+d));el.value=v;}
+function setA(v){att=v;document.getElementById('ayes').classList.toggle('on',v);document.getElementById('ano').classList.toggle('on',!v);var rf=document.getElementById('rcnt-rf');if(rf)rf.style.display=v?'block':'none';}
+function checkRsvp(){/* RSVP pre-check removed — now handled server-side via Supabase */}
+function subRsvp(){
+  const name=GN||document.getElementById('rn').value.trim();
+  if(!name){showT('Please enter your name');return;}
+  if(att===null){showT('Please select attendance');return;}
+  const cnt=att?(parseInt(document.getElementById('rcnt').value)||1):0;
+  const btn=document.getElementById('rsbtn');
+  btn.disabled=true;btn.querySelector('span').textContent='SENDING\u2026';
+  try {
+    const list = JSON.parse(localStorage.getItem('wedding_rsvps') || '[]');
+    list.push({ name: name, attendance: att ? 'attending' : 'declined', count: cnt, timestamp: new Date().toISOString() });
+    localStorage.setItem('wedding_rsvps', JSON.stringify(list));
+  }catch(e){}
+  setTimeout(function(){
+    document.getElementById('rform').style.display='none';
+    document.getElementById('rok').classList.add('show');
+    document.getElementById('rokmsg').textContent=att?'Thank you, '+name+'! We can\'t wait to celebrate with you.':'Thank you, '+name+'. Your blessings mean the world.';
+    showT('RSVP RECEIVED \u2714');
+  }, 300);
+}
+
+/* WISHES — Supabase */
+function esc_w(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+function _wishCard(w){
+  return`<div class="wc" id="wc-${esc_w(w.id)}">
+    <div class="wcm">${esc_w(w.message)}</div>
+    <div class="wc-meta">
+      <span class="wcn">— ${esc_w((w.guest_name||'').toLowerCase())}</span>
+      <button class="wlb" onclick="likeWish('${esc_w(w.id)}',this)" title="Like this wish">
+        <span class="wlhrt">♥</span><span class="wlcnt">${w.likes||0}</span>
+      </button>
+    </div>
+  </div>`;
+}
+function renderWishes(wishes){
+  const g=document.getElementById('wgrid');
+  if(!g)return;
+  if(!wishes||!wishes.length){g.innerHTML='<div style="font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:.18em;color:var(--muted);text-align:center;padding:20px 0;opacity:.6">No wishes yet — be the first!</div>';return;}
+  g.innerHTML=wishes.map(w=>_wishCard(w)).join('');
+}
+async function sendW(){
+  const n=document.getElementById('wn').value.trim();
+  const m=document.getElementById('wm').value.trim();
+  if(!n||!m){showT('Enter name and wish');return;}
+  if(rwts&&Date.now()-rwts<2000){showT('Please wait a moment');return;}
+  const btn=document.querySelector('.wsb');
+  btn.disabled=true;btn.textContent='SENDING\u2026';
+  const newWish = { id: 'w_' + Date.now(), guest_name: n, message: m, likes: 0 };
+  let wishes = [];
+  try {
+    wishes = JSON.parse(localStorage.getItem('wedding_wishes_data')) || [
+      { id: 'w1', guest_name: 'Sharma Family', message: 'Wishing you both a lifetime of love and happiness! May your union be blessed with joy.', likes: 6 },
+      { id: 'w2', guest_name: 'Rahul & Priya', message: 'Heartiest congratulations to the wonderful couple! So thrilled to celebrate this special day with you both.', likes: 4 },
+      { id: 'w3', guest_name: 'Rajesh Uncle', message: 'May God shower his choicest blessings upon you both as you begin this beautiful new journey together.', likes: 2 }
+    ];
+  } catch(e){ wishes = []; }
+  wishes.unshift(newWish);
+  try { localStorage.setItem('wedding_wishes_data', JSON.stringify(wishes)); } catch(e){}
+  rwts=Date.now();
+  document.getElementById('wn').value='';
+  document.getElementById('wm').value='';
+  btn.disabled=false;btn.textContent='SEND WISH \u2736';
+  showT('Wish sent! \u2736');
+  const g=document.getElementById('wgrid');
+  if(g){
+    const noWishes=g.querySelector('div[style]');
+    if(noWishes)g.innerHTML='';
+    const tmp=document.createElement('div');
+    tmp.innerHTML=_wishCard(newWish);
+    g.insertBefore(tmp.firstChild,g.firstChild);
+  }
+}
+async function likeWish(wishId,btn){
+  btn.disabled=true;
+  try{
+    let wishes = [];
+    try { wishes = JSON.parse(localStorage.getItem('wedding_wishes_data')) || []; } catch(e){}
+    const target = wishes.find(w => w.id === wishId);
+    let likes = 1;
+    if(target){
+      target.likes = (target.likes || 0) + 1;
+      likes = target.likes;
+      localStorage.setItem('wedding_wishes_data', JSON.stringify(wishes));
+    } else {
+      const cnt=btn.querySelector('.wlcnt');
+      likes = (parseInt(cnt ? cnt.textContent : 0) || 0) + 1;
+    }
+    const cnt=btn.querySelector('.wlcnt');
+    if(cnt)cnt.textContent=likes;
+    btn.classList.add('liked');
+    btn.disabled=false;
+  }catch(e){btn.disabled=false;}
+}
+
+/* ── SAVE-STATE INDICATORS ── */
+function markDirty(){
+  var d=document.getElementById('ocb-save-dot');if(d){d.classList.remove('saved','error');d.classList.add('dirty');}
+  var s=document.getElementById('esb-save-status');if(s)s.textContent='Unsaved changes';
+}
+function markSaved(){
+  var d=document.getElementById('ocb-save-dot');if(d){d.classList.remove('dirty','error');d.classList.add('saved');}
+  var s=document.getElementById('esb-save-status');if(s)s.textContent='All changes saved';
+}
+function markError(){
+  var d=document.getElementById('ocb-save-dot');if(d){d.classList.remove('dirty','saved');d.classList.add('error');}
+  var s=document.getElementById('esb-save-status');if(s)s.textContent='Save failed';
+}
+
+/* ── EDIT SIDEBAR ── */
+function openES(){popES();document.getElementById('eov').style.display='block';document.getElementById('esb').classList.add('open');document.body.style.overflow='hidden';}
+function closeES(){document.getElementById('eov').style.display='none';document.getElementById('esb').classList.remove('open');document.body.style.overflow='';saveWD();}
+function esT(h){var bd=h.nextElementSibling,ar=h.querySelector('.esca');if(!bd)return;var op=bd.classList.toggle('op');if(ar)ar.style.transform=op?'rotate(180deg)':'';}
+function lv(k,v){wd[k]=v;updateUI({});if(typeof markDirty==='function')markDirty();}
+
+function popES(){
+  var w=wd,g=function(id){return document.getElementById(id);};
+  if(g('esg'))g('esg').value=w.groom_name||'';
+  if(g('esb_'))g('esb_').value=w.bride_name||'';
+  if(g('esdi'))g('esdi').value=w.date_iso||'';
+  if(g('estm'))g('estm').value=w.event_time||'';
+  if(g('esv'))g('esv').value=w.venue||'';
+  if(g('esrd'))g('esrd').value=w.rsvp_deadline||'';
+  if(g('essl'))g('essl').value=w.story_lede||'';
+  if(g('es-gparents'))g('es-gparents').value=w.fm_gparents||'';
+  if(g('es-gplace'))g('es-gplace').value=w.fm_gplace||'';
+  if(g('es-bparents'))g('es-bparents').value=w.fm_bparents||'';
+  if(g('es-bplace'))g('es-bplace').value=w.fm_bplace||'';
+  if(g('esAudio'))g('esAudio').value=w.audio_url||'';
+  if(g('esMapEmbed'))g('esMapEmbed').value=w.map_embed||'';
+  bldEvEd();bldStEd();
+}
+
+/* Events editor */
+function bldEvEd(){
+  var c=document.getElementById('esEvBd');if(!c)return;
+  var evs=wd.events||[];
+  var addBtn='<button class="esdl" style="width:100%;border-radius:9px;padding:9px;font-size:.66rem;letter-spacing:.06em;color:var(--gold);border-color:rgba(154,123,58,.3)" onclick="addEv()">+ ADD EVENT</button>';
+  c.innerHTML=evs.map(function(ev,i){
+    return '<div style="border:1px solid rgba(12,12,12,.08);border-radius:12px;padding:11px;margin-bottom:10px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-family:Cinzel,serif;font-size:7.5px;letter-spacing:.18em;color:var(--gold)">EVENT '+(i+1)+'</span><button class="esdl" onclick="delEv('+i+')" title="Remove event">\u2715</button></div>'+
+      '<div class="esrw"><div class="eslb">NAME</div><div class="esfi"><input class="esin" value="'+esc(ev.name||'')+'" oninput="evF('+i+',\'name\',this.value)"></div></div>'+
+      '<div class="esrw"><div class="eslb">DATE</div><div class="esfi"><input type="date" class="esin" value="'+_dateToInput(ev.date)+'" oninput="evDateF('+i+',this.value)"></div></div>'+
+      '<div class="esrw"><div class="eslb">TIME</div><div class="esfi"><input type="time" class="esin" value="'+_timeToInput(ev.time)+'" oninput="evTimeF('+i+',this.value)"></div></div>'+
+      '<div class="esrw"><div class="eslb">VENUE</div><div class="esfi"><input class="esin" value="'+esc(ev.venue||'')+'" oninput="evF('+i+',\'venue\',this.value)"></div></div>'+
+      '<div class="esrw"><div class="eslb">ADDRESS</div><div class="esfi"><input class="esin" value="'+esc(ev.address||'')+'" oninput="evF('+i+',\'address\',this.value)"></div></div>'+
+      '<div class="esrw"><div class="eslb">MAP LINK</div><div class="esfi"><input class="esin" value="'+esc(ev.map_url||'')+'" oninput="evF('+i+',\'map_url\',this.value)" placeholder="https://maps.google.com/..."></div></div>'+
+      '</div>';
+  }).join('')+addBtn;
+}
+function evF(i,k,v){if(!wd.events||!wd.events[i])return;wd.events[i][k]=v;renderEvs(wd.events);if(typeof markDirty==='function')markDirty();}
+function addEv(){wd.events=wd.events||[];wd.events.push({name:'New Event',date:'',time:'',venue:'',address:'',map_url:'#'});bldEvEd();renderEvs(wd.events);if(typeof markDirty==='function')markDirty();}
+function delEv(i){if(!wd.events)return;wd.events.splice(i,1);bldEvEd();renderEvs(wd.events);if(typeof markDirty==='function')markDirty();}
+
+/* Date/time picker <-> stored-string conversion for event cards.
+   wd.events[i].date / .time stay plain display strings (same format,
+   same field names, same DB shape as before) — these helpers only
+   translate to/from the native <input type="date"/"time"> ISO value
+   so the picker can show and edit them. */
+function _dateToInput(str){
+  if(!str) return '';
+  var d=new Date(str);
+  if(isNaN(d.getTime())) return '';
+  var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+da;
+}
+function _inputToDateDisplay(v){
+  if(!v) return '';
+  var d=new Date(v+'T12:00');
+  if(isNaN(d.getTime())) return v;
+  return d.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+}
+function _timeToInput(str){
+  if(!str) return '';
+  var d=new Date('1970-01-01 '+str);
+  if(isNaN(d.getTime())) return '';
+  var h=String(d.getHours()).padStart(2,'0'),m=String(d.getMinutes()).padStart(2,'0');
+  return h+':'+m;
+}
+function _inputToTimeDisplay(v){
+  if(!v) return '';
+  var parts=v.split(':'); if(parts.length<2) return v;
+  var h=parseInt(parts[0],10),m=parts[1];
+  var ap=h>=12?'PM':'AM'; var h12=h%12; if(h12===0)h12=12;
+  return h12+':'+m+' '+ap;
+}
+function evDateF(i,v){if(!wd.events||!wd.events[i])return;wd.events[i].date=_inputToDateDisplay(v);renderEvs(wd.events);if(typeof markDirty==='function')markDirty();}
+function evTimeF(i,v){if(!wd.events||!wd.events[i])return;wd.events[i].time=_inputToTimeDisplay(v);renderEvs(wd.events);if(typeof markDirty==='function')markDirty();}
+
+/* Love-story editor */
+function bldStEd(){
+  var c=document.getElementById('esStBd');if(!c)return;
+  var sts=wd.story||[];
+  var addBtn='<button class="esdl" style="width:100%;border-radius:9px;padding:9px;font-size:.66rem;letter-spacing:.06em;color:var(--gold);border-color:rgba(154,123,58,.3)" onclick="addSt()">+ ADD CHAPTER</button>';
+  c.innerHTML=sts.map(function(ch,i){
+    var imgPrev=ch.image?'<img src="'+esc(ch.image)+'" style="width:100%;border-radius:9px;margin-top:6px;aspect-ratio:4/3;object-fit:cover">':'';
+    return '<div style="border:1px solid rgba(12,12,12,.08);border-radius:12px;padding:11px;margin-bottom:10px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-family:Cinzel,serif;font-size:7.5px;letter-spacing:.18em;color:var(--gold)">CHAPTER '+(i+1)+'</span><button class="esdl" onclick="delSt('+i+')" title="Remove chapter">\u2715</button></div>'+
+      '<div class="esrw"><div class="eslb">YEAR</div><div class="esfi"><input class="esin" value="'+esc(ch.year||'')+'" oninput="stF('+i+',\'year\',this.value)"></div></div>'+
+      '<div class="esrw"><div class="eslb">TITLE</div><div class="esfi"><input class="esin" value="'+esc(ch.label||'')+'" oninput="stF('+i+',\'label\',this.value)"></div></div>'+
+      '<div class="esrw"><div class="eslb">TEXT</div><div class="esfi"><textarea class="esin" style="min-height:60px;resize:vertical" oninput="stF('+i+',\'text\',this.value)">'+esc(ch.text||'')+'</textarea></div></div>'+
+      '<div class="esrw"><div class="eslb">PHOTO (OPTIONAL)</div><div class="esfi"><label class="esdl" style="cursor:pointer;width:100%;border-radius:9px;padding:8px;font-size:.62rem;letter-spacing:.08em;color:var(--gold);border-color:rgba(154,123,58,.3);white-space:nowrap">\u2191 UPLOAD PHOTO<input type="file" accept="image/*" style="display:none" onchange="uploadStImg('+i+',this)"></label></div>'+imgPrev+
+      (ch.image?'<button class="esdl" style="width:100%;margin-top:6px;border-radius:9px;padding:6px;font-size:.6rem" onclick="stF('+i+',\'image\',\'\');bldStEd()">remove photo</button>':'')+'</div>'+
+      '</div>';
+  }).join('')+addBtn;
+}
+function stF(i,k,v){if(!wd.story||!wd.story[i])return;wd.story[i][k]=v;renderStory(wd.story);if(typeof markDirty==='function')markDirty();}
+function addSt(){wd.story=wd.story||[];wd.story.push({year:'YEAR',label:'NEW CHAPTER',text:'',image:''});bldStEd();renderStory(wd.story);if(typeof markDirty==='function')markDirty();}
+function delSt(i){if(!wd.story)return;wd.story.splice(i,1);bldStEd();renderStory(wd.story);if(typeof markDirty==='function')markDirty();}
+
+  async function uploadStImg(i,input){
+  var f=input.files&&input.files[0];if(!f)return;
+  showT('UPLOADING PHOTO\u2026');
+  try{
+    var dataUrl=await _compressImage(f,1200,0.82);
+    if(wd.story&&wd.story[i]){
+      wd.story[i].image=dataUrl;
+      renderStory(wd.story);
+      bldStEd();
+      if(typeof markDirty==='function')markDirty();
+      saveWD();
+      showT('PHOTO ADDED \u2714');
+    }
+  }catch(e){showT('Upload failed. Try a smaller image.');}
+}
+
+/* ── Asset upload helper (preview snapshot + story photos) ── */
+async function _compressImage(file, maxEdge, quality){
+  maxEdge = maxEdge || 1600; quality = quality || 0.82;
+  var dataUrl = await new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=rej;r.readAsDataURL(file);});
+  var img = await new Promise(function(res,rej){var i=new Image();i.onload=function(){res(i);};i.onerror=rej;i.src=dataUrl;});
+  var w=img.width, h=img.height, scale=Math.min(1, maxEdge/Math.max(w,h));
+  var cw=Math.round(w*scale), ch=Math.round(h*scale);
+  var c=document.createElement('canvas'); c.width=cw; c.height=ch;
+  c.getContext('2d').drawImage(img,0,0,cw,ch);
+  return c.toDataURL('image/jpeg', quality); // already a data URL, ready to send
+}
+  
+/* ── Slug helpers (dead — slug now frozen server-side at first publish) ── */
+function _capFirst(s){return (s||'').charAt(0).toUpperCase()+(s||'').slice(1);}
+function _cleanName(s){return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+function generateSlugTp4(g,b){return _cleanName(g)+'-and-'+_cleanName(b);}
+function generateUniqueSlugTp4(g,b){return generateSlugTp4(g,b);}
+function _cleanSlug(s){return (s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60);}
+
+/* ── DRAFT SAVE (writes draft_details only; live untouched until publish) ── */
+async function saveWD(){
+  var btn=document.getElementById('esb-save-btn');if(btn)btn.disabled=true;
+  var st=document.getElementById('esb-save-status');if(st)st.textContent='Saving\u2026';
+  try{
+    localStorage.setItem('wedding_invitation_data', JSON.stringify(wd));
+    if(typeof markSaved==='function')markSaved();
+    showT('CHANGES SAVED \u2726');
+    refreshPublishUI();
+  }catch(e){
+    if(typeof markError==='function')markError();
+    showT('Save failed. Try again.');
+  }finally{if(btn)btn.disabled=false;}
+}
+
+/* ── Publish status UI ── */
+function refreshPublishUI(){
+  var es=window.__editSystem;
+  var inv=es.invitation||{};
+  var slug=inv.slug||es.slug;
+  var pending=!!inv.has_unpublished_changes;
+  var statusEl=document.getElementById('ocb-status');
+  var textEl=document.getElementById('ocb-status-text');
+  var btn=document.getElementById('ocb-publish-btn');
+  var lbl=document.getElementById('ocb-publish-label');
+  if(statusEl)statusEl.classList.remove('is-draft','is-pending','is-published');
+  if(!slug){
+    if(statusEl)statusEl.classList.add('is-draft');
+    if(textEl)textEl.textContent='Draft';
+    if(lbl)lbl.textContent='Publish';
+    if(btn)btn.disabled=false;
+  }else if(pending){
+    if(statusEl)statusEl.classList.add('is-pending');
+    if(textEl)textEl.textContent='Pending changes';
+    if(lbl)lbl.textContent='Publish changes';
+    if(btn)btn.disabled=false;
+  }else{
+    if(statusEl)statusEl.classList.add('is-published');
+    if(textEl)textEl.textContent='Published';
+    if(lbl)lbl.textContent='Published';
+    if(btn)btn.disabled=true;
+  }
+}
+
+/* ── Publish flow ── */
+async function publishInvitation(){
+  var es=window.__editSystem;
+  await saveWD();
+  var slug=(es.invitation&&es.invitation.slug)||es.slug;
+  if(!slug){openPublishModal();return;}
+  var btn=document.getElementById('ocb-publish-btn');if(btn)btn.disabled=true;
+  try{
+    await doPublish(null);
+    showT('PUBLISHED \u2713 YOUR CHANGES ARE LIVE');
+  }catch(e){showT('Publish failed. Try again.');if(btn)btn.disabled=false;}
+}
+async function doPublish(slug){
+  var es=window.__editSystem;
+  var data={};if(slug)data.slug=slug;
+  var res=await fetch('/api/update-template',{
+    method:'POST',
+    headers:{'Content-Type':'application/json',...(es.token?{'Authorization':'Bearer '+es.token}:{})},
+    body:JSON.stringify({action:'publish',id:es.invId,data:data})
+  });
+  var j=await res.json();
+  if(!res.ok||j.success===false)throw new Error((j&&j.error)||'Publish failed');
+  var finalSlug=(j.invitation&&j.invitation.slug)||slug||es.slug;
+  if(es.invitation){es.invitation.slug=finalSlug;es.invitation.status='published';es.invitation.has_unpublished_changes=false;es.invitation.published_details=JSON.parse(JSON.stringify(wd));}
+  es.slug=finalSlug;
+  refreshPublishUI();
+  return finalSlug;
+}
+
+/* ── Publish modal (index aesthetic) ── */
+function _ensurePublishStyle(){
+  if(document.getElementById('publish-modal-style'))return;
+  var st=document.createElement('style');st.id='publish-modal-style';
+  st.textContent=`
+    #publish-modal-ov{position:fixed;inset:0;z-index:10000;background:rgba(12,12,12,.42);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:1.2rem;font-family:'DM Sans',system-ui,sans-serif;}
+    #publish-modal-ov.open{display:flex;}
+    #publish-modal{width:100%;max-width:420px;background:#f7f6f1;border-radius:22px;padding:1.7rem 1.6rem 1.5rem;box-shadow:0 40px 90px -30px rgba(12,12,12,.5);animation:pmIn .3s cubic-bezier(.2,.8,.2,1);}
+    @keyframes pmIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+    #publish-modal h3{font-size:1.18rem;font-weight:600;letter-spacing:-.015em;color:#0c0c0c;margin-bottom:.3rem;}
+    #publish-modal p.pm-sub{font-size:.82rem;color:rgba(12,12,12,.55);margin-bottom:1.1rem;line-height:1.5;}
+    #publish-modal .pm-field{display:flex;align-items:center;background:#fff;border:1px solid rgba(12,12,12,.14);border-radius:12px;padding:.2rem .2rem .2rem .8rem;transition:border-color .2s,box-shadow .2s;}
+    #publish-modal .pm-field:focus-within{border-color:rgba(12,12,12,.55);box-shadow:0 0 0 3px rgba(12,12,12,.06);}
+    #publish-modal .pm-field input{flex:1;border:0;outline:0;background:transparent;font-family:'DM Sans',sans-serif;font-size:.92rem;color:#0c0c0c;padding:.55rem 0;min-width:0;}
+    #publish-modal .pm-suffix{font-size:.82rem;color:rgba(12,12,12,.4);padding:0 .7rem;white-space:nowrap;}
+    #publish-modal .pm-status{font-size:.74rem;margin:.55rem .2rem 0;min-height:1.1em;}
+    #publish-modal .pm-status.ok{color:#3f9c63;}
+    #publish-modal .pm-status.bad{color:#d64545;}
+    #publish-modal .pm-status.checking{color:rgba(12,12,12,.45);}
+    #publish-modal .pm-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.7rem;}
+    #publish-modal .pm-chip{font-size:.72rem;font-family:'DM Sans',sans-serif;color:#0c0c0c;background:rgba(12,12,12,.05);border:1px solid rgba(12,12,12,.1);border-radius:100px;padding:.32rem .7rem;cursor:pointer;transition:background .2s;}
+    #publish-modal .pm-chip:hover{background:rgba(12,12,12,.1);}
+    #publish-modal .pm-actions{display:flex;gap:.6rem;margin-top:1.4rem;}
+    #publish-modal .pm-btn{flex:1;padding:.78rem;border-radius:100px;border:0;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .15s;}
+    #publish-modal .pm-btn.ghost{background:transparent;color:rgba(12,12,12,.6);border:1px solid rgba(12,12,12,.16);}
+    #publish-modal .pm-btn.solid{background:#0c0c0c;color:#f5f4ef;}
+    #publish-modal .pm-btn.solid:disabled{opacity:.4;cursor:default;}
+    #publish-modal .pm-btn.solid:active{transform:translateY(1px);}
+  `;
+  document.head.appendChild(st);
+}
+function openPublishModal(){
+  _ensurePublishStyle();
+  var es=window.__editSystem;
+  var suggested=_cleanSlug((wd.groom_name||'')+'-and-'+(wd.bride_name||''))||'our-wedding';
+  var ov=document.getElementById('publish-modal-ov');
+  if(!ov){
+    ov=document.createElement('div');ov.id='publish-modal-ov';
+    ov.innerHTML='<div id="publish-modal">'+
+      '<h3>Publish your invitation</h3>'+
+      '<p class="pm-sub">Choose a web address. This becomes your permanent link \u2014 it can\u2019t be changed after publishing.</p>'+
+      '<div class="pm-field"><input id="pm-slug" type="text" autocomplete="off" spellcheck="false" placeholder="our-wedding"><span class="pm-suffix">.syncandstyle.com</span></div>'+
+      '<div class="pm-status" id="pm-status"></div>'+
+      '<div class="pm-chips" id="pm-chips"></div>'+
+      '<div class="pm-actions"><button class="pm-btn ghost" onclick="closePublishModal()">Cancel</button><button class="pm-btn solid" id="pm-confirm" onclick="confirmPublish()" disabled>Publish</button></div>'+
+      '</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){if(e.target===ov)closePublishModal();});
+  }
+  var inp=document.getElementById('pm-slug');
+  inp.value=suggested;
+  inp.oninput=function(){scheduleSlugCheck();};
+  ov.classList.add('open');
+  setTimeout(function(){inp.focus();inp.select();runSlugCheck();},120);
+}
+function closePublishModal(){var ov=document.getElementById('publish-modal-ov');if(ov)ov.classList.remove('open');}
+var __slugTimer=null,__slugOK=false;
+function scheduleSlugCheck(){if(__slugTimer)clearTimeout(__slugTimer);var st=document.getElementById('pm-status');if(st){st.className='pm-status checking';st.textContent='Checking availability\u2026';}var btn=document.getElementById('pm-confirm');if(btn)btn.disabled=true;__slugOK=false;__slugTimer=setTimeout(runSlugCheck,450);}
+async function runSlugCheck(){
+  var es=window.__editSystem;
+  var inp=document.getElementById('pm-slug');if(!inp)return;
+  var raw=inp.value;var clean=_cleanSlug(raw);
+  if(clean!==raw){inp.value=clean;}
+  var st=document.getElementById('pm-status');var btn=document.getElementById('pm-confirm');
+  if(!clean){if(st){st.className='pm-status bad';st.textContent='Enter a web address.';}if(btn)btn.disabled=true;__slugOK=false;return;}
+  if(st){st.className='pm-status checking';st.textContent='Checking availability\u2026';}
+  try{
+    var res=await fetch('/api/update-template',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',...(es.token?{'Authorization':'Bearer '+es.token}:{})},
+      body:JSON.stringify({action:'check-slug',data:{slug:clean,exclude:es.invId}})
+    });
+    var j=await res.json();
+    var available=j.available!==false&&!j.taken;
+    if(available){
+      if(st){st.className='pm-status ok';st.textContent='\u2713 '+clean+'.syncandstyle.com is available';}
+      if(btn)btn.disabled=false;__slugOK=true;
+      var chips=document.getElementById('pm-chips');if(chips)chips.innerHTML='';
+    }else{
+      if(st){st.className='pm-status bad';st.textContent='That address is taken. Try another:';}
+      if(btn)btn.disabled=true;__slugOK=false;
+      var sugg=j.suggestions||[clean+'-2026',clean+'-wedding',clean+'-1'];
+      var chips=document.getElementById('pm-chips');
+      if(chips)chips.innerHTML=sugg.slice(0,4).map(function(s){return '<button class="pm-chip" onclick="document.getElementById(\'pm-slug\').value=\''+esc(s)+'\';runSlugCheck()">'+esc(s)+'</button>';}).join('');
+    }
+  }catch(e){if(st){st.className='pm-status bad';st.textContent='Could not check. Try again.';}if(btn)btn.disabled=true;__slugOK=false;}
+}
+async function confirmPublish(){
+  if(!__slugOK)return;
+  var inp=document.getElementById('pm-slug');var slug=_cleanSlug(inp.value);
+  var btn=document.getElementById('pm-confirm');if(btn){btn.disabled=true;btn.textContent='Publishing\u2026';}
+  try{
+    await doPublish(slug);
+    closePublishModal();
+    showT('PUBLISHED \u2713 '+slug+'.syncandstyle.com');
+  }catch(e){if(btn){btn.disabled=false;btn.textContent='Publish';}var st=document.getElementById('pm-status');if(st){st.className='pm-status bad';st.textContent='Publish failed. Try again.';}}
+}
+
+/* BACKGROUND AUDIO */
+window.uploadAudioFile = async function(input){
+  var f = input && input.files && input.files[0];
+  if(!f) return;
+  var nm = document.getElementById('esAudioName'); if(nm) nm.textContent = f.name;
+  showT('LOADING AUDIO\u2026');
+  if(typeof markDirty === 'function') markDirty();
+  try{
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var url = e.target.result;
+      wd.audio_url = url;
+      var ai = document.getElementById('esAudio'); if(ai) ai.value = f.name;
+      if(typeof updateAudio === 'function') updateAudio(url);
+      input.value = '';
+      saveWD();
+      showT('AUDIO ADDED \u2714');
+    };
+    reader.readAsDataURL(f);
+  }catch(e){
+    if(typeof markError === 'function') markError();
+    showT('Upload failed. Paste a URL instead.');
+  }
+};
+
+/* Uploads an MP3 to /api/upload-asset using the field names that route
+   actually expects (file_data / file_name / asset_type:"music"), and reads
+   the response back from "public_url" — the previous code used mismatched
+   field names (data/content_type/filename, asset_type:"audio") which the
+   API silently rejected with a 400 before anything reached Storage. */
+async function _uploadAudioAsset(file){
+  var es = window.__editSystem;
+  if(!es.invId) throw new Error('no invitation id');
+  var dataUrl = await new Promise(function(res,rej){
+    var r = new FileReader();
+    r.onload = function(){ res(r.result); };
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+  var res = await fetch('/api/upload-asset', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(es.token ? { 'Authorization': 'Bearer ' + es.token } : {})
+    },
+    body: JSON.stringify({
+      invitation_id: es.invId,
+      asset_type: 'music',
+      folder: 'wedding',
+      file_data: dataUrl,
+      file_name: file.name || 'audio.mp3'
+    })
+  });
+  var j = await res.json();
+  if(!res.ok || !j.public_url) throw new Error((j && j.error) || 'upload failed');
+  return j.public_url;
+}
+
+
+function updateAudio(url){if(!url)return;wd.audio_url=url;setMusicUrl(url);}
+
+/* VENUE MAP */
+function updateMap(embed){
+  if(!embed)return;
+  var src=embed;
+  var m=embed.match(/src=["']([^"']+)["']/i);if(m)src=m[1];
+  var fr=document.getElementById('mapFrame'),sec=document.getElementById('mapSection'),err=document.getElementById('map-err');
+  if(fr&&/^https?:\/\//i.test(src)){fr.src=src;if(sec)sec.style.display='';if(err)err.style.display='none';}
+  else if(err){err.style.display='block';}
+}
+
+/* FAVICON */
+function updateFavicon(){
+  try{
+    var gi=((wd.groom_name||'G').trim().charAt(0)||'G').toUpperCase();
+    var bi=((wd.bride_name||'B').trim().charAt(0)||'B').toUpperCase();
+    var c=document.createElement('canvas');c.width=64;c.height=64;var x=c.getContext('2d');
+    x.fillStyle='#fdf5ec';x.fillRect(0,0,64,64);
+    x.fillStyle='#9a7b3a';x.fillRect(0,0,64,3);
+    x.fillStyle='#8F3914';x.font='600 28px Georgia, serif';x.textAlign='center';x.textBaseline='middle';
+    x.fillText(gi+'\u00b7'+bi,32,35);
+    var url=c.toDataURL('image/png');
+    var l=document.querySelector('link[rel="icon"]');
+    if(!l){l=document.createElement('link');l.rel='icon';document.head.appendChild(l);}
+    l.href=url;
+  }catch(e){}
+}
+
+/* UTILS */
+var _toastTimer=null;
+function showT(msg){
+  var t=document.getElementById('toast');if(!t)return;
+  t.textContent=msg;t.classList.add('show');
+  if(_toastTimer)clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(function(){t.classList.remove('show');},2600);
+}
+
+/* OM — floating \u0950 on tap (after invitation opens) */
+var __omReady=false;
+var __OM_SVG='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44"><text x="22" y="33" font-size="34" text-anchor="middle" font-family="serif" fill="#000">\u0950</text></svg>');
+function _spawnOM(x,y){
+  for(var k=0;k<2;k++){
+    var img=document.createElement('img');
+    img.className='omp';img.src=__OM_SVG;img.alt='';
+    img.style.left=x+'px';img.style.top=y+'px';
+    img.style.width=(22+Math.random()*14)+'px';
+    img.style.setProperty('--odx',(Math.random()*120-60)+'px');
+    img.style.setProperty('--odur',(3+Math.random()*1.6)+'s');
+    img.style.setProperty('--odel',(k*0.12)+'s');
+    img.style.setProperty('--oop',(0.5+Math.random()*0.4));
+    document.body.appendChild(img);
+    (function(el){setTimeout(function(){if(el&&el.parentNode)el.parentNode.removeChild(el);},5200);})(img);
+  }
+}
+function initOM(){
+  if(__omReady)return;__omReady=true;
+  document.addEventListener('pointerdown',function(e){
+    if(!document.body.classList.contains('io'))return;
+    var t=e.target;
+    if(t&&t.closest&&t.closest('button,a,input,textarea,select,label,#esb,#owner-control-bar,#qr-ov,#publish-modal-ov,#mute-btn,#share-always,#own'))return;
+    _spawnOM(e.clientX,e.clientY);
+  },{passive:true});
+}
+
+/* MUSIC */
+function setMusicUrl(url){
+  var a=document.getElementById('bg-music'),s=document.getElementById('music-src');
+  if(!a||!s||!url)return;
+  if(s.getAttribute('src')!==url){s.setAttribute('src',url);try{a.load();}catch(e){}}
+}
+function initMusic(){
+  var a=document.getElementById('bg-music');if(!a)return;
+  var mb=document.getElementById('mute-btn');if(mb)mb.classList.add('vis');
+  if(wd.audio_url)setMusicUrl(wd.audio_url);
+  var p=a.play();if(p&&p.catch)p.catch(function(){_audioPending=true;});
+  _updateMuteIcon();
+}
+function toggleMusic(){
+  var a=document.getElementById('bg-music');if(!a)return;
+  if(a.paused)a.play().catch(function(){});else a.pause();
+  _updateMuteIcon();
+}
+function toggleMute(){
+  var a=document.getElementById('bg-music');if(!a)return;
+  if(a.paused){a.muted=false;a.play().catch(function(){});}
+  else{a.muted=!a.muted;}
+  _updateMuteIcon();
+}
+function _updateMuteIcon(){
+  var a=document.getElementById('bg-music'),on=document.getElementById('mute-icon-on'),off=document.getElementById('mute-icon-off');
+  if(!a)return;
+  var silent=a.muted||a.paused;
+  if(on)on.style.display=silent?'none':'';
+  if(off)off.style.display=silent?'':'none';
+}
+
+/* Register OM */
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initOM);else initOM();
+</script>
+
+<audio id="bg-music" loop preload="none"><source id="music-src" src="" type="audio/mpeg"></audio>
+
+<div id="mute-btn" class="vis" onclick="toggleMute()" title="Toggle music">
+  <svg id="mute-icon-on" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+  <svg id="mute-icon-off" viewBox="0 0 24 24" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+</div>
+
+</body>
+</html>
